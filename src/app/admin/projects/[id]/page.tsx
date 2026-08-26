@@ -119,8 +119,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       ? "bg-blue-50 text-blue-700 border-blue-200"
       : "bg-slate-100 text-slate-700 border-slate-200";
 
+  const contractorOptions = (contractors || []).map((c: any) => ({
+    id: c.id,
+    company_name: c.company_name,
+    full_name: c.profiles?.full_name,
+  }));
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
+
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -252,8 +259,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   </div>
                   <PaymentFormModal
                     projectId={id}
+                    contractors={contractorOptions}
                     triggerLabel="+ Record Payment"
                   />
+
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs sm:text-sm text-slate-700">

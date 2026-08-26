@@ -6,9 +6,16 @@ import { createPayment, updatePayment, deletePayment } from "./payment-actions";
 
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
+export interface ContractorOption {
+  id: string;
+  company_name: string;
+  full_name?: string | null;
+}
+
 interface PaymentFormModalProps {
   projectId: string;
   unitActivityId?: string | null;
+  contractors?: ContractorOption[];
   payment?: {
     id: string;
     amount: number;
@@ -24,6 +31,7 @@ interface PaymentFormModalProps {
 export default function PaymentFormModal({
   projectId,
   unitActivityId = null,
+  contractors = [],
   payment,
   triggerLabel = "Record Payment",
   isEdit = false,
@@ -32,6 +40,7 @@ export default function PaymentFormModal({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [useCustomRecipient, setUseCustomRecipient] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
@@ -133,18 +142,52 @@ export default function PaymentFormModal({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Paid To (Contractor / Vendor / Agency) *
-                </label>
-                <input
-                  name="paid_to"
-                  type="text"
-                  required
-                  defaultValue={payment?.paid_to || ""}
-                  placeholder="e.g. Apex Electricals &amp; MEP"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    Paid To (Assigned Contractor) *
+                  </label>
+                  {contractors.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setUseCustomRecipient(!useCustomRecipient)}
+                      className="text-[11px] text-blue-600 font-semibold hover:underline"
+                    >
+                      {useCustomRecipient ? "Select Assigned Contractor" : "Custom Name"}
+                    </button>
+                  )}
+                </div>
+
+                {contractors.length > 0 && !useCustomRecipient ? (
+                  <select
+                    name="paid_to"
+                    required
+                    defaultValue={
+                      payment?.paid_to ||
+                      `${contractors[0].company_name}${contractors[0].full_name ? ` (${contractors[0].full_name})` : ""}`
+                    }
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm font-semibold"
+                  >
+                    {contractors.map((c) => {
+                      const val = `${c.company_name}${c.full_name ? ` (${c.full_name})` : ""}`;
+                      return (
+                        <option key={c.id} value={val}>
+                          🏢 {val}
+                        </option>
+                      );
+                    })}
+                  </select>
+                ) : (
+                  <input
+                    name="paid_to"
+                    type="text"
+                    required
+                    defaultValue={payment?.paid_to || ""}
+                    placeholder="e.g. Apex Electricals & MEP"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
+                  />
+                )}
               </div>
+
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

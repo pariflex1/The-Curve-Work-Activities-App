@@ -31,6 +31,7 @@ export default async function OwnerDashboard() {
     { data: profile },
     { data: projects },
     { data: payments },
+    { data: contractors },
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
     supabase.from("projects").select(`
@@ -49,7 +50,15 @@ export default async function OwnerDashboard() {
       )
     `).order("created_at", { ascending: false }),
     supabase.from("payments").select("*").order("payment_date", { ascending: false }),
+    supabase.from("project_contractors").select("id, company_name, profiles(full_name)"),
   ]);
+
+  const contractorOptions = (contractors || []).map((c: any) => ({
+    id: c.id,
+    company_name: c.company_name,
+    full_name: c.profiles?.full_name,
+  }));
+
 
 
   // Calculate totals
@@ -226,8 +235,10 @@ export default async function OwnerDashboard() {
                     <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                       <PaymentFormModal
                         projectId={project.id}
+                        contractors={contractorOptions}
                         triggerLabel="Record Payment"
                       />
+
 
                       <Link
                         href={`/admin/projects/${project.id}`}
