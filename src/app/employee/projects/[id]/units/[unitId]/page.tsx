@@ -42,60 +42,60 @@ export default async function EmployeeUnitPage({ params }: EmployeeUnitPageProps
 
   if (!unit) notFound();
 
-  // Fetch activities for this unit
-  const { data: activities } = await supabase
-    .from("unit_activities")
-    .select(`
-      *,
-      activity_master (
-        id,
-        name,
-        code,
-        category,
-        default_unit
-      ),
-      project_contractors (
+  // Fetch activities, contractors, active masters, and other units concurrently
+  const [
+    { data: activities },
+    { data: projectContractors },
+    { data: activeMasters },
+    { data: otherUnits },
+  ] = await Promise.all([
+    supabase
+      .from("unit_activities")
+      .select(`
+        *,
+        activity_master (
+          id,
+          name,
+          code,
+          category,
+          default_unit
+        ),
+        project_contractors (
+          id,
+          company_name,
+          profiles ( full_name )
+        )
+      `)
+      .eq("unit_id", unitId)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("project_contractors")
+      .select(`
         id,
         company_name,
         profiles ( full_name )
-      )
-    `)
-    .eq("unit_id", unitId)
-    .order("sort_order", { ascending: true });
+      `)
+      .eq("project_id", projectId),
+    supabase
+      .from("activity_master")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("units")
+      .select(`
+        id,
+        unit_number,
+        blocks!inner (
+          name,
+          project_id
+        ),
+        unit_activities ( count )
+      `)
+      .eq("blocks.project_id", projectId)
+      .neq("id", unitId),
+  ]);
 
-  // Fetch contractors linked to this project
-  const { data: projectContractors } = await supabase
-    .from("project_contractors")
-    .select(`
-      id,
-      company_name,
-      profiles (
-        full_name
-      )
-    `)
-    .eq("project_id", projectId);
-
-  // Fetch active activity masters for Engineer provisioning
-  const { data: activeMasters } = await supabase
-    .from("activity_master")
-    .select("*")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true });
-
-  // Fetch all other units in this project for cloning
-  const { data: otherUnits } = await supabase
-    .from("units")
-    .select(`
-      id,
-      unit_number,
-      blocks!inner (
-        name,
-        project_id
-      ),
-      unit_activities ( count )
-    `)
-    .eq("blocks.project_id", projectId)
-    .neq("id", unitId);
 
   const existingMasterIds = (activities || []).map((a) => a.activity_master_id);
 

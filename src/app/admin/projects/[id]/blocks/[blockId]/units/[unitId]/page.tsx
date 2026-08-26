@@ -46,58 +46,60 @@ export default async function UnitActivitiesPage({ params }: UnitActivityPagePro
     notFound();
   }
 
-  // Fetch unit activities with activity_master and contractor
-  const { data: unitActivities } = await supabase
-    .from("unit_activities")
-    .select(`
-      *,
-      activity_master (
+  // Fetch unit activities, active masters, other units, and project contractors concurrently
+  const [
+    { data: unitActivities },
+    { data: activeMasters },
+    { data: otherUnits },
+    { data: projectContractors },
+  ] = await Promise.all([
+    supabase
+      .from("unit_activities")
+      .select(`
+        *,
+        activity_master (
+          id,
+          name,
+          code,
+          category,
+          default_unit
+        ),
+        project_contractors (
+          id,
+          company_name,
+          profiles ( full_name )
+        )
+      `)
+      .eq("unit_id", unitId)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("activity_master")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("units")
+      .select(`
         id,
-        name,
-        code,
-        category,
-        default_unit
-      ),
-      project_contractors (
+        unit_number,
+        blocks!inner (
+          name,
+          project_id
+        ),
+        unit_activities ( count )
+      `)
+      .eq("blocks.project_id", projectId)
+      .neq("id", unitId),
+    supabase
+      .from("project_contractors")
+      .select(`
         id,
         company_name,
         profiles ( full_name )
-      )
-    `)
-    .eq("unit_id", unitId)
-    .order("sort_order", { ascending: true });
+      `)
+      .eq("project_id", projectId),
+  ]);
 
-  // Fetch active activity masters for "From Template" mode
-  const { data: activeMasters } = await supabase
-    .from("activity_master")
-    .select("*")
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true });
-
-  // Fetch all other units in this project for "Copy from Unit" mode
-  const { data: otherUnits } = await supabase
-    .from("units")
-    .select(`
-      id,
-      unit_number,
-      blocks!inner (
-        name,
-        project_id
-      ),
-      unit_activities ( count )
-    `)
-    .eq("blocks.project_id", projectId)
-    .neq("id", unitId);
-
-  // Fetch project contractors
-  const { data: projectContractors } = await supabase
-    .from("project_contractors")
-    .select(`
-      id,
-      company_name,
-      profiles ( full_name )
-    `)
-    .eq("project_id", projectId);
 
   const totalEstimatedCost =
     unitActivities?.reduce((acc, a) => acc + (Number(a.estimated_cost) || 0), 0) || 0;
