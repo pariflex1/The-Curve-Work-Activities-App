@@ -222,61 +222,9 @@ export default function AdminWorkPaymentConsole({ projects }: AdminWorkPaymentCo
         </div>
       </div>
 
-      {/* Project Financial & Progress KPI Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 bg-slate-50/80 border border-slate-200/80 rounded-2xl p-4">
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">
-            Total Budget
-          </span>
-          <p className="text-base sm:text-lg font-extrabold font-mono text-slate-900">
-            ₹{projectStats.totalEst.toLocaleString("en-IN")}
-          </p>
-          <span className="text-[11px] text-slate-500 font-medium">Across {projectStats.totalActivities} activities</span>
-        </div>
-
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 block mb-1">
-            Disbursed
-          </span>
-          <p className="text-base sm:text-lg font-extrabold font-mono text-emerald-700">
-            ₹{projectStats.totalPaid.toLocaleString("en-IN")}
-          </p>
-          <span className="text-[11px] text-slate-500 font-medium">
-            {projectStats.totalEst > 0 ? Math.round((projectStats.totalPaid / projectStats.totalEst) * 100) : 0}% Paid
-          </span>
-        </div>
-
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-purple-600 block mb-1">
-            Remaining Due
-          </span>
-          <p className="text-base sm:text-lg font-extrabold font-mono text-purple-700">
-            ₹{projectStats.balance.toLocaleString("en-IN")}
-          </p>
-          <span className="text-[11px] text-slate-500 font-medium">Unpaid balance</span>
-        </div>
-
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/70 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600 block mb-1">
-            Verified Progress
-          </span>
-          <div className="flex items-center gap-2">
-            <p className="text-base sm:text-lg font-extrabold font-mono text-blue-700">
-              {projectStats.avgProgress}%
-            </p>
-            <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
-              <div
-                className="h-full bg-blue-600 rounded-full transition-all duration-500"
-                style={{ width: `${projectStats.avgProgress}%` }}
-              />
-            </div>
-          </div>
-          <span className="text-[11px] text-slate-500 font-medium">Site-wide average</span>
-        </div>
-      </div>
-
       {/* Main 2-Column Workflow: Left = Unit Selection | Right = Work Activities & Payments */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
         {/* Step 2: Unit Picker (4 cols on lg) */}
         <div className="lg:col-span-4 space-y-3.5">
           <div className="flex items-center justify-between">
