@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Lato } from "next/font/google";
 import "./globals.css";
+import NavigationLoader from "@/components/NavigationLoader";
 
 const lato = Lato({
   weight: ["100", "300", "400", "700", "900"],
@@ -58,7 +59,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900">{children}</body>
+      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900">
+        <NavigationLoader />
+        {children}
+      </body>
     </html>
   );
 }
+
