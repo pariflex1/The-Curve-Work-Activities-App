@@ -1,5 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { signOut } from "@/app/auth/actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
@@ -10,11 +9,9 @@ import {
   Clock,
   Crown,
   ChevronRight,
-  LogOut,
 } from "lucide-react";
 import PaymentFormModal from "@/app/admin/payments/PaymentFormModal";
-import UserManualModal from "@/components/UserManualModal";
-import PWAInstallButton from "@/components/PWAInstallButton";
+import AppShell from "@/components/AppShell";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +48,6 @@ export default async function OwnerDashboard() {
     supabase.from("payments").select("*").order("payment_date", { ascending: false }),
   ]);
 
-
   // Calculate totals
   let totalEstimatedCost = 0;
   (projects || []).forEach((p) => {
@@ -68,8 +64,8 @@ export default async function OwnerDashboard() {
   const balanceDue = totalEstimatedCost - totalPaid;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <AppShell role="owner" userName={profile?.full_name} userEmail={user.email}>
+      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
@@ -84,26 +80,6 @@ export default async function OwnerDashboard() {
                 Welcome, <strong className="text-slate-800">{profile?.full_name || "Owner"}</strong> — Portfolio Balances &amp; Payment Ledger
               </p>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-            <PWAInstallButton />
-            <UserManualModal role="owner" triggerLabel="Owner Guide" />
-            <Link
-              href="/"
-              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors min-h-[40px] flex items-center"
-            >
-              Home
-            </Link>
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs sm:text-sm font-semibold transition-colors min-h-[40px] flex items-center gap-1.5"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Sign Out</span>
-              </button>
-            </form>
           </div>
         </div>
 
@@ -312,6 +288,7 @@ export default async function OwnerDashboard() {
           </div>
         </div>
       </div>
-    </main>
+    </AppShell>
   );
 }
+
