@@ -147,7 +147,15 @@ export default async function BlockDetailPage({ params }: BlockDetailPageProps) 
                     </div>
                   </div>
 
-                  <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-end gap-2">
+                  <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-between gap-2">
+                    <Link
+                      href={`/admin/projects/${projectId}/blocks/${blockId}/units/${unit.id}`}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold flex items-center gap-1 transition-all"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Activities</span>
+                    </Link>
+
                     <UnitFormModal
                       projectId={projectId}
                       blockId={blockId}
