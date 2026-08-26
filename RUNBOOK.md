@@ -17,7 +17,7 @@ Supabase projects maintain automated daily backups with point-in-time recovery (
 ```bash
 # Dump the complete database schema and data
 pg_dump --clean --if-exists --no-owner --no-privileges \
-  -h db.mjgneisuyrlvvcjtdaaz.supabase.co \
+  -h db.pxofmqorcpbnwapnzjkv.supabase.co \
   -U postgres \
   -d postgres > backup_$(date +%Y%m%d_%H%M%S).sql
 ```
@@ -25,7 +25,7 @@ pg_dump --clean --if-exists --no-owner --no-privileges \
 ### Disaster Recovery Restore
 ```bash
 # Restore schema and records onto a clean database
-psql -h db.mjgneisuyrlvvcjtdaaz.supabase.co \
+psql -h db.pxofmqorcpbnwapnzjkv.supabase.co \
   -U postgres \
   -d postgres < backup_20260826_000000.sql
 ```
