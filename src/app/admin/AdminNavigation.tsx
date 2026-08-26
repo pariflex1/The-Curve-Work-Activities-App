@@ -8,31 +8,21 @@ import {
   Users,
   FileSpreadsheet,
   ShieldCheck,
-  UserPlus,
   BookOpen,
   LogOut,
   Download,
-  Home,
-  Menu,
-  X,
 } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
-import UserManualModal from "@/components/UserManualModal";
-import UserManagementModal, { UserProfileItem } from "./users/UserManagementModal";
 import PWAInstallButton from "@/components/PWAInstallButton";
-import { useState } from "react";
 
 interface AdminNavigationProps {
   adminName?: string;
-  profiles?: UserProfileItem[];
 }
 
 export default function AdminNavigation({
   adminName = "Administrator",
-  profiles = [],
 }: AdminNavigationProps) {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     {
@@ -64,6 +54,12 @@ export default function AdminNavigation({
       href: "/admin/audit-logs",
       icon: ShieldCheck,
       isActive: pathname.startsWith("/admin/audit-logs"),
+    },
+    {
+      label: "User Manual",
+      href: "/admin/manual",
+      icon: BookOpen,
+      isActive: pathname.startsWith("/admin/manual"),
     },
   ];
 
@@ -97,7 +93,7 @@ export default function AdminNavigation({
           {/* Main Navigation Section */}
           <div className="space-y-1.5">
             <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
-              Core Modules
+              Menu Navigation
             </span>
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -118,39 +114,16 @@ export default function AdminNavigation({
             })}
           </div>
 
-          {/* Quick Tools & Utilities Section */}
+          {/* Quick App Actions */}
           <div className="space-y-2 pt-4 border-t border-slate-100">
             <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
-              System Actions
+              Application
             </span>
-
-            {/* Manage Accounts Modal Trigger Button */}
-            <UserManagementModal
-              profiles={profiles}
-              triggerLabel="Manage Accounts"
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold text-slate-700 hover:text-slate-950 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 transition-all shadow-2xs"
-            />
-
-            {/* User Manual Modal Trigger Button */}
-            <UserManualModal
-              role="admin"
-              triggerLabel="User Manual"
-              className="w-full flex items-center justify-start gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold text-slate-700 hover:text-slate-950 bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 transition-all shadow-2xs"
-            />
 
             {/* Install App PWA Trigger Button */}
             <div className="pt-1">
-              <PWAInstallButton className="w-full py-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all border border-blue-400/30" />
+              <PWAInstallButton className="w-full py-2.5 px-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all border border-blue-400/30 cursor-pointer" />
             </div>
-
-            {/* Back to Home Link Button */}
-            <Link
-              href="/"
-              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all"
-            >
-              <Home className="w-4 h-4 text-slate-400" />
-              <span>Public Landing Page</span>
-            </Link>
           </div>
         </div>
 
@@ -233,19 +206,6 @@ export default function AdminNavigation({
               </Link>
             );
           })}
-
-          {/* Mobile Quick Action Buttons */}
-          <UserManagementModal
-            profiles={profiles}
-            triggerLabel="Manage Accounts"
-            className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold shrink-0 flex items-center gap-1.5 shadow-2xs"
-          />
-
-          <UserManualModal
-            role="admin"
-            triggerLabel="User Manual"
-            className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold shrink-0 flex items-center gap-1.5 shadow-2xs"
-          />
         </div>
       </header>
     </>

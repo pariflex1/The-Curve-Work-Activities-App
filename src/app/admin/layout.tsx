@@ -16,19 +16,18 @@ export default async function AdminLayout({
 
   if (!user) redirect("/login");
 
-  const [{ data: profile }, { data: profiles }] = await Promise.all([
-    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
-    supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-  ]);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-      <AdminNavigation
-        adminName={profile?.full_name || "Admin"}
-        profiles={profiles || []}
-      />
+      <AdminNavigation adminName={profile?.full_name || "Admin"} />
       <div className="lg:pl-72 flex-1 flex flex-col">
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+
           {children}
         </main>
       </div>
