@@ -7,11 +7,13 @@ import {
   Building2,
   Users,
   FileSpreadsheet,
+  FileText,
   ShieldCheck,
   BookOpen,
   LogOut,
   Download,
 } from "lucide-react";
+
 import { signOut } from "@/app/auth/actions";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
@@ -50,6 +52,12 @@ export default function AdminNavigation({
       isActive: pathname.startsWith("/admin/activity-master"),
     },
     {
+      label: "Reports & Exports",
+      href: "/admin/reports",
+      icon: FileText,
+      isActive: pathname.startsWith("/admin/reports"),
+    },
+    {
       label: "Audit & Logs",
       href: "/admin/audit-logs",
       icon: ShieldCheck,
@@ -62,6 +70,7 @@ export default function AdminNavigation({
       isActive: pathname.startsWith("/admin/manual"),
     },
   ];
+
 
   return (
     <>

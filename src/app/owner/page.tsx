@@ -101,13 +101,8 @@ export default async function OwnerDashboard() {
           <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
             <PWAInstallButton />
             <UserManualModal role="owner" triggerLabel="Owner Guide" />
-            <Link
-              href="/"
-              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors min-h-[40px] flex items-center"
-            >
-              Home
-            </Link>
             <form action={signOut}>
+
               <button
                 type="submit"
                 className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs sm:text-sm font-semibold transition-colors min-h-[40px] flex items-center gap-1.5"
