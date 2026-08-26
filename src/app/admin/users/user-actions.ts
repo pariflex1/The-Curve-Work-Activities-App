@@ -193,7 +193,7 @@ export async function deleteUserAccount(profileId: string) {
 
   const admin = check.adminClient;
 
-  // Find user_id
+  // Find user_id and profile info
   const { data: targetProfile, error: fetchErr } = await admin
     .from("profiles")
     .select("id, user_id, full_name, role")
@@ -204,19 +204,47 @@ export async function deleteUserAccount(profileId: string) {
     return { error: "User profile not found." };
   }
 
-  // Delete Auth User
-  const { error: delAuthErr } = await admin.auth.admin.deleteUser(targetProfile.user_id);
-  if (delAuthErr) {
-    // If auth user already deleted or errored, still try to delete profile
+  // 1. Unassign contractor from unit_activities and remove project_contractors entries
+  const { data: contractorEntries } = await admin
+    .from("project_contractors")
+    .select("id")
+    .eq("profile_id", profileId);
+
+  if (contractorEntries && contractorEntries.length > 0) {
+    const contractorIds = contractorEntries.map((c) => c.id);
+    await admin
+      .from("unit_activities")
+      .update({ assigned_contractor_id: null })
+      .in("assigned_contractor_id", contractorIds);
+
+    await admin.from("project_contractors").delete().eq("profile_id", profileId);
   }
 
+  // 2. Remove project_owners entries
+  await admin.from("project_owners").delete().eq("profile_id", profileId);
+
+  // 3. Remove project_employees entries
+  await admin.from("project_employees").delete().eq("profile_id", profileId);
+
+  // 4. Nullify actor_profile_id in audit_logs so FK constraint on audit_logs is satisfied
+  await admin
+    .from("audit_logs")
+    .update({ actor_profile_id: null })
+    .eq("actor_profile_id", profileId);
+
+  // 5. Delete profile row
   const { error: delProfileErr } = await admin.from("profiles").delete().eq("id", profileId);
   if (delProfileErr) {
     return { error: delProfileErr.message };
   }
 
-  // Write audit log
-  if (check.profile?.id) {
+  // 6. Delete Auth User
+  if (targetProfile.user_id) {
+    await admin.auth.admin.deleteUser(targetProfile.user_id).catch(() => {});
+  }
+
+  // 7. Write audit log
+  if (check.profile?.id && check.profile.id !== profileId) {
     await admin.from("audit_logs").insert({
       actor_profile_id: check.profile.id,
       action: "DELETE_USER_ACCOUNT",
@@ -234,3 +262,4 @@ export async function deleteUserAccount(profileId: string) {
   revalidatePath("/admin/users");
   return { success: true };
 }
+

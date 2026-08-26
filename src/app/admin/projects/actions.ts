@@ -264,6 +264,21 @@ export async function assignContractor(projectId: string, profileId: string, com
 
 export async function removeContractor(projectId: string, profileId: string) {
   const supabase = await createClient();
+
+  // Find project_contractor record ID
+  const { data: pc } = await supabase
+    .from("project_contractors")
+    .select("id")
+    .match({ project_id: projectId, profile_id: profileId })
+    .maybeSingle();
+
+  if (pc?.id) {
+    await supabase
+      .from("unit_activities")
+      .update({ assigned_contractor_id: null })
+      .eq("assigned_contractor_id", pc.id);
+  }
+
   const { error } = await supabase
     .from("project_contractors")
     .delete()
@@ -273,6 +288,7 @@ export async function removeContractor(projectId: string, profileId: string) {
   revalidatePath(`/admin/projects/${projectId}`);
   return { success: true };
 }
+
 
 export async function assignOwner(projectId: string, profileId: string) {
   const supabase = await createClient();
