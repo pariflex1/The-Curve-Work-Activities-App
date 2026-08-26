@@ -113,9 +113,14 @@ export default async function EmployeeDashboard() {
                       </div>
                     </div>
 
-                    <div className="p-3 bg-blue-500/5 rounded-xl border border-blue-500/10 text-xs text-blue-300">
-                      Contractor assignment and activity tracking enabled in Phase 5.
-                    </div>
+                    <Link
+                      href={`/employee/projects/${project.id}`}
+                      className="w-full py-2.5 px-4 rounded-xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-300 flex items-center justify-center gap-2 font-medium transition-all text-sm"
+                    >
+                      <Briefcase className="w-4 h-4" />
+                      <span>Manage Unit Contractors</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
                   </div>
                 );
               })

@@ -122,6 +122,14 @@ export default async function UnitActivitiesPage({ params }: UnitActivityPagePro
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href={`/admin/projects/${projectId}/blocks/${blockId}/units/${unitId}/progress`}
+              className="px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 text-sm font-semibold flex items-center gap-1.5 transition-all"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Live Progress Dashboard</span>
+            </Link>
+
             <ProvisionModal
               unitId={unitId}
               projectId={projectId}
