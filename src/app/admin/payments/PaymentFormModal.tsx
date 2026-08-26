@@ -69,66 +69,75 @@ export default function PaymentFormModal({
       try {
         const supabase = createBrowserClient();
 
-        // 1. Fetch unit activities for this project
-        const { data: ua } = await supabase
-          .from("unit_activities")
-          .select(`
-            id,
-            estimated_cost,
-            progress_percentage,
-            activity_master ( name ),
-            units!inner (
-              unit_number,
-              blocks!inner (
-                name,
-                project_id
-              )
-            ),
-            project_contractors (
-              company_name,
-              profiles ( full_name )
-            )
-          `)
-          .eq("units.blocks.project_id", projectId);
+        // 1. Fetch blocks & units for this project to ensure 100% reliable query without deep nested join errors
+        const { data: blocks } = await supabase
+          .from("blocks")
+          .select("id, name, units(id, unit_number)")
+          .eq("project_id", projectId);
 
-        if (!isMounted) return;
+        const unitMap: Record<string, { unitNumber: string; blockName: string }> = {};
+        const unitIds: string[] = [];
+
+        (blocks || []).forEach((b: any) => {
+          (b.units || []).forEach((u: any) => {
+            unitIds.push(u.id);
+            unitMap[u.id] = { unitNumber: u.unit_number, blockName: b.name };
+          });
+        });
 
         let list: UnitActivityOption[] = [];
-        if (ua && ua.length > 0) {
-          list = ua.map((item: any) => {
-            const blockName = item.units?.blocks?.name || "Block";
-            const unitNumber = item.units?.unit_number || "Unit";
-            const activityName = item.activity_master?.name || "Activity";
-            const contractorName = item.project_contractors
-              ? `${item.project_contractors.company_name}${
-                  item.project_contractors.profiles?.full_name
-                    ? ` (${item.project_contractors.profiles.full_name})`
-                    : ""
-                }`
-              : "Unassigned";
 
-            return {
-              id: item.id,
-              unit_number: unitNumber,
-              block_name: blockName,
-              activity_name: activityName,
-              contractor_name: contractorName,
-              estimated_cost: Number(item.estimated_cost) || 0,
-              progress_percentage: Number(item.progress_percentage) || 0,
-            };
-          });
+        if (unitIds.length > 0) {
+          const { data: ua } = await supabase
+            .from("unit_activities")
+            .select(`
+              id,
+              unit_id,
+              estimated_cost,
+              progress_percentage,
+              activity_master ( name ),
+              project_contractors (
+                company_name,
+                profiles ( full_name )
+              )
+            `)
+            .in("unit_id", unitIds);
 
-          setUnitActivitiesList(list);
+          if (!isMounted) return;
 
-          const initialId = unitActivityId || list[0]?.id || "";
-          setSelectedUnitActivityId(initialId);
-          const matched = list.find((a) => a.id === initialId);
-          if (matched && matched.contractor_name !== "Unassigned" && !selectedContractorName) {
-            setSelectedContractorName(matched.contractor_name);
+          if (ua && ua.length > 0) {
+            list = ua.map((item: any) => {
+              const info = unitMap[item.unit_id] || { unitNumber: "Unit", blockName: "Block" };
+              const activityName = item.activity_master?.name || "Activity";
+              const cName = item.project_contractors?.company_name || "";
+              const pName = item.project_contractors?.profiles?.full_name || "";
+              const contractorName = cName
+                ? `${cName}${pName && pName !== cName ? ` — ${pName}` : ""}`
+                : "Unassigned";
+
+              return {
+                id: item.id,
+                unit_number: info.unitNumber,
+                block_name: info.blockName,
+                activity_name: activityName,
+                contractor_name: contractorName,
+                estimated_cost: Number(item.estimated_cost) || 0,
+                progress_percentage: Number(item.progress_percentage) || 0,
+              };
+            });
+
+            setUnitActivitiesList(list);
+
+            const initialId = unitActivityId || list[0]?.id || "";
+            setSelectedUnitActivityId(initialId);
+            const matched = list.find((a) => a.id === initialId);
+            if (matched && matched.contractor_name !== "Unassigned" && !selectedContractorName) {
+              setSelectedContractorName(matched.contractor_name);
+            }
           }
         }
 
-        // 2. Fetch project contractors list
+        // 2. Fetch project contractors list or all contractor profiles
         if (contractors && contractors.length > 0) {
           setContractorList(contractors);
         } else {
@@ -147,6 +156,23 @@ export default function PaymentFormModal({
                 full_name: c.profiles?.full_name,
               }))
             );
+          } else {
+            const { data: profiles } = await supabase
+              .from("profiles")
+              .select("id, full_name, company_name")
+              .eq("role", "contractor");
+
+            if (!isMounted) return;
+
+            if (profiles && profiles.length > 0) {
+              setContractorList(
+                profiles.map((p: any) => ({
+                  id: p.id,
+                  company_name: p.company_name || p.full_name,
+                  full_name: p.full_name,
+                }))
+              );
+            }
           }
         }
       } catch (err) {
@@ -157,6 +183,7 @@ export default function PaymentFormModal({
         }
       }
     }
+
 
     loadData();
 
@@ -335,13 +362,18 @@ export default function PaymentFormModal({
                   <select
                     name="paid_to"
                     required
-                    value={selectedContractorName || (contractorList[0] ? `${contractorList[0].company_name}${contractorList[0].full_name && contractorList[0].full_name !== contractorList[0].company_name ? ` (${contractorList[0].full_name})` : ""}` : "")}
+                    value={
+                      selectedContractorName ||
+                      (contractorList[0]
+                        ? `${contractorList[0].company_name}${contractorList[0].full_name && contractorList[0].full_name !== contractorList[0].company_name ? ` — ${contractorList[0].full_name}` : ""}`
+                        : "")
+                    }
                     onChange={(e) => setSelectedContractorName(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm font-semibold cursor-pointer"
                   >
                     {contractorList.length > 0 ? (
                       contractorList.map((c) => {
-                        const val = `${c.company_name}${c.full_name && c.full_name !== c.company_name ? ` (${c.full_name})` : ""}`;
+                        const val = `${c.company_name}${c.full_name && c.full_name !== c.company_name ? ` — ${c.full_name}` : ""}`;
                         return (
                           <option key={c.id} value={val}>
                             🏢 {val}
@@ -351,9 +383,10 @@ export default function PaymentFormModal({
                     ) : selectedActivity && selectedActivity.contractor_name !== "Unassigned" ? (
                       <option value={selectedActivity.contractor_name}>🏢 {selectedActivity.contractor_name}</option>
                     ) : (
-                      <option value="Apex Civil Structures">🏢 Apex Civil Structures (Default)</option>
+                      <option value="Apex Civil Structures — Amit Patel">🏢 Apex Civil Structures — Amit Patel</option>
                     )}
                   </select>
+
                 ) : (
                   <input
                     name="paid_to"
