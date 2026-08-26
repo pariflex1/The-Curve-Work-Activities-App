@@ -35,21 +35,15 @@ export default async function ProjectsPage() {
     <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <Link
-              href="/admin"
-              className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 transition-colors text-slate-600 hover:text-slate-900 shrink-0 min-h-[40px] flex items-center justify-center"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
+            <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+              <Building2 className="w-6 h-6" />
+            </div>
             <div>
-              <div className="flex items-center gap-2">
-                <Building2 className="w-6 h-6 text-black shrink-0" />
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                  Projects Management
-                </h1>
-              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                Projects Management
+              </h1>
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-normal">
                 Manage construction sites, structural blocks, unit inventories, and team allocations
               </p>
@@ -60,7 +54,6 @@ export default async function ProjectsPage() {
             <ProjectFormModal />
           </div>
         </div>
-
 
         {/* Status Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -120,7 +113,7 @@ export default async function ProjectsPage() {
               return (
                 <div
                   key={project.id}
-                  className="bg-white border border-slate-200 hover:border-black rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                  className="bg-white border border-slate-200 hover:border-black rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2 mb-3">
@@ -141,7 +134,7 @@ export default async function ProjectsPage() {
                       </p>
                     )}
 
-                    <div className="grid grid-cols-3 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100 mb-6 text-center">
+                    <div className="grid grid-cols-3 gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-100 mb-6 text-center">
                       <div>
                         <p className="text-xs text-slate-500 font-medium">Blocks</p>
                         <p className="text-base sm:text-lg font-bold text-slate-900 mt-0.5">{totalBlocks}</p>
@@ -157,10 +150,11 @@ export default async function ProjectsPage() {
                     </div>
                   </div>
 
+                  {/* Highlighted Manage Hierarchy & Team Button */}
                   <div className="pt-2">
                     <Link
                       href={`/admin/projects/${project.id}`}
-                      className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-black border border-slate-200 hover:border-black text-slate-700 hover:text-white flex items-center justify-center gap-1.5 font-semibold transition-all text-xs min-h-[40px]"
+                      className="w-full py-3 px-4 rounded-2xl bg-black hover:bg-slate-800 text-white font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-xs sm:text-sm min-h-[44px] cursor-pointer"
                     >
                       <span>Manage Hierarchy &amp; Team</span>
                       <ChevronRight className="w-4 h-4" />
@@ -169,6 +163,7 @@ export default async function ProjectsPage() {
                 </div>
               );
             })
+
 
           ) : (
             <div className="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-slate-200 shadow-sm p-6">

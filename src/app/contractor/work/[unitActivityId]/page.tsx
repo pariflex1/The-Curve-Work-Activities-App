@@ -2,8 +2,8 @@ import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
-  ArrowLeft,
   Briefcase,
+  HardHat,
   Home,
   Building2,
   Calendar,
@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   ClipboardCheck,
 } from "lucide-react";
+
 
 export const dynamic = "force-dynamic";
 
@@ -95,17 +96,15 @@ export default async function ContractorWorkDetailPage({ params }: WorkDetailPag
     <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex items-center justify-between gap-3.5">
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex items-center justify-between gap-3.5">
           <div className="flex items-center gap-3.5">
-            <Link
-              href="/contractor"
-              className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-colors shrink-0 min-h-[40px] flex items-center justify-center"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
+            <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+              <HardHat className="w-6 h-6" />
+            </div>
             <div>
               <div className="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap">
                 <span>{project?.name}</span>
+
                 <span className="text-slate-300">/</span>
                 <span>{block?.name}</span>
                 <span className="text-slate-300">/</span>
