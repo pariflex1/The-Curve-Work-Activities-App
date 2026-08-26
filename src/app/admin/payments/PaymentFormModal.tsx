@@ -137,15 +137,6 @@ export default function PaymentFormModal({
         }
 
         setSelectedUnitActivityId(targetActivityId);
-
-        // Set suggested amount
-        if (!payment?.amount && targetActivityId) {
-          const act = loadedActivities.find((a) => a.id === targetActivityId);
-          if (act) {
-            const suggested = act.estimated_cost * (act.progress_percentage / 100);
-            setAmountValue(suggested > 0 ? String(suggested) : "");
-          }
-        }
       } catch (err) {
         console.error("Error loading payment context:", err);
       } finally {
@@ -223,10 +214,6 @@ export default function PaymentFormModal({
     const nextAct = acts[0] || rawActivities.find((a) => a.unit_id === nextUnitId) || rawActivities[0];
     if (nextAct) {
       setSelectedUnitActivityId(nextAct.id);
-      if (!payment?.amount) {
-        const suggested = nextAct.estimated_cost * (nextAct.progress_percentage / 100);
-        setAmountValue(suggested > 0 ? String(suggested) : "");
-      }
     }
   }
 
@@ -244,10 +231,6 @@ export default function PaymentFormModal({
     const nextAct = acts[0] || rawActivities.find((a) => a.unit_id === newUnitId) || rawActivities[0];
     if (nextAct) {
       setSelectedUnitActivityId(nextAct.id);
-      if (!payment?.amount) {
-        const suggested = nextAct.estimated_cost * (nextAct.progress_percentage / 100);
-        setAmountValue(suggested > 0 ? String(suggested) : "");
-      }
     }
   }
 
@@ -258,12 +241,9 @@ export default function PaymentFormModal({
       if (act.contractor_name && act.contractor_name !== "Unassigned" && !selectedContractorName) {
         setSelectedContractorName(act.contractor_name);
       }
-      if (!payment?.amount) {
-        const suggested = act.estimated_cost * (act.progress_percentage / 100);
-        setAmountValue(suggested > 0 ? String(suggested) : "");
-      }
     }
   }
+
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
