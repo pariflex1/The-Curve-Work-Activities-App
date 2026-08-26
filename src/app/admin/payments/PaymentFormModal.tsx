@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, X, Coins, Trash2, Building2, CheckCircle2 } from "lucide-react";
+import { Plus, X, Coins, Trash2 } from "lucide-react";
 import { createPayment, updatePayment, deletePayment } from "./payment-actions";
 import { createClient as createBrowserClient } from "@/utils/supabase/client";
 
@@ -19,6 +19,7 @@ export interface RawActivityItem {
   unit_number: string;
   block_name: string;
   activity_name: string;
+  contractor_id: string | null;
   contractor_name: string;
   contractor_company: string;
   contractor_person: string;
@@ -83,7 +84,43 @@ export default function PaymentFormModal({
       try {
         const supabase = createBrowserClient();
 
-        // 1. Fetch blocks & units for this project
+        // 1. Fetch project contractors
+        const { data: pc } = await supabase
+          .from("project_contractors")
+          .select("id, company_name, profile_id, profiles(full_name)")
+          .eq("project_id", projectId);
+
+        let validContractors: ContractorOption[] = [];
+        if (pc && pc.length > 0) {
+          validContractors = pc
+            .filter((c: any) => c.company_name || c.profiles?.full_name)
+            .map((c: any) => ({
+              id: c.id,
+              company_name: c.company_name || "Contractor",
+              full_name: c.profiles?.full_name || null,
+            }));
+        } else if (contractors && contractors.length > 0) {
+          validContractors = contractors;
+        } else {
+          const { data: profs } = await supabase
+            .from("profiles")
+            .select("id, full_name, company_name")
+            .eq("role", "contractor");
+
+          if (profs && profs.length > 0) {
+            validContractors = profs.map((p: any) => ({
+              id: p.id,
+              company_name: p.company_name || p.full_name,
+              full_name: p.full_name,
+            }));
+          }
+        }
+
+        if (isMounted) {
+          setContractorList(validContractors);
+        }
+
+        // 2. Fetch blocks & units for this project
         const { data: blocks } = await supabase
           .from("blocks")
           .select("id, name, units(id, unit_number)")
@@ -91,11 +128,14 @@ export default function PaymentFormModal({
 
         const unitMap: Record<string, { unitNumber: string; blockName: string }> = {};
         const unitIds: string[] = [];
+        const allUnitsList: { unit_id: string; label: string }[] = [];
 
         (blocks || []).forEach((b: any) => {
           (b.units || []).forEach((u: any) => {
             unitIds.push(u.id);
+            const label = `${b.name} — Unit ${u.unit_number}`;
             unitMap[u.id] = { unitNumber: u.unit_number, blockName: b.name };
+            allUnitsList.push({ unit_id: u.id, label });
           });
         });
 
@@ -107,10 +147,12 @@ export default function PaymentFormModal({
             .select(`
               id,
               unit_id,
+              contractor_id,
               estimated_cost,
               progress_percentage,
               activity_master ( name ),
               project_contractors (
+                id,
                 company_name,
                 profiles ( full_name )
               )
@@ -125,7 +167,8 @@ export default function PaymentFormModal({
               const activityName = item.activity_master?.name || "Activity";
               const cCompany = item.project_contractors?.company_name || "";
               const cPerson = item.project_contractors?.profiles?.full_name || "";
-              const cName = cCompany ? formatContractorLabel(cCompany, cPerson) : "Unassigned";
+              const cId = item.contractor_id || item.project_contractors?.id || null;
+              const cName = cCompany ? formatContractorLabel(cCompany, cPerson) : "";
 
               return {
                 id: item.id,
@@ -133,6 +176,7 @@ export default function PaymentFormModal({
                 unit_number: info.unitNumber,
                 block_name: info.blockName,
                 activity_name: activityName,
+                contractor_id: cId,
                 contractor_name: cName,
                 contractor_company: cCompany,
                 contractor_person: cPerson,
@@ -145,73 +189,41 @@ export default function PaymentFormModal({
           }
         }
 
-        // 2. Fetch project contractors list
-        let loadedContractors: ContractorOption[] = [];
-        if (contractors && contractors.length > 0) {
-          loadedContractors = contractors;
-          setContractorList(contractors);
-        } else {
-          const { data: pc } = await supabase
-            .from("project_contractors")
-            .select("id, company_name, profiles(full_name)")
-            .eq("project_id", projectId);
-
-          if (!isMounted) return;
-
-          if (pc && pc.length > 0) {
-            loadedContractors = pc.map((c: any) => ({
-              id: c.id,
-              company_name: c.company_name,
-              full_name: c.profiles?.full_name,
-            }));
-            setContractorList(loadedContractors);
-          } else {
-            const { data: profiles } = await supabase
-              .from("profiles")
-              .select("id, full_name, company_name")
-              .eq("role", "contractor");
-
-            if (!isMounted) return;
-
-            if (profiles && profiles.length > 0) {
-              loadedContractors = profiles.map((p: any) => ({
-                id: p.id,
-                company_name: p.company_name || p.full_name,
-                full_name: p.full_name,
-              }));
-              setContractorList(loadedContractors);
-            }
-          }
-        }
-
         // 3. Initialize default selections for 3 cascading dropdowns
-        if (loadedActivities.length > 0) {
-          const targetActivity = unitActivityId
-            ? loadedActivities.find((a) => a.id === unitActivityId)
-            : payment?.paid_to
-            ? loadedActivities.find((a) => a.contractor_name === payment.paid_to || a.contractor_company === payment.paid_to)
-            : loadedActivities[0];
+        if (validContractors.length > 0) {
+          const defaultContractor = validContractors[0];
+          const defaultContractorLabel = formatContractorLabel(defaultContractor.company_name, defaultContractor.full_name);
+          const initialContractor = payment?.paid_to || defaultContractorLabel;
+          setSelectedContractorName(initialContractor);
 
-          if (targetActivity) {
-            const cLabel = targetActivity.contractor_name !== "Unassigned"
-              ? targetActivity.contractor_name
-              : loadedContractors[0]
-              ? formatContractorLabel(loadedContractors[0].company_name, loadedContractors[0].full_name)
-              : "";
+          const matchingActs = loadedActivities.filter(
+            (a) =>
+              a.contractor_name === initialContractor ||
+              a.contractor_company === defaultContractor.company_name ||
+              (defaultContractor.company_name && a.contractor_name.includes(defaultContractor.company_name)) ||
+              a.contractor_id === defaultContractor.id
+          );
 
-            setSelectedContractorName(payment?.paid_to || cLabel);
-            setSelectedUnitId(targetActivity.unit_id);
-            setSelectedUnitActivityId(targetActivity.id);
-            
+          const candidateUnits = matchingActs.length > 0 ? matchingActs : loadedActivities;
+          const firstUnitId = candidateUnits[0]?.unit_id || allUnitsList[0]?.unit_id || "";
+          setSelectedUnitId(firstUnitId);
+
+          const firstAct = candidateUnits.find((a) => a.unit_id === firstUnitId) ||
+            loadedActivities.find((a) => a.unit_id === firstUnitId) ||
+            loadedActivities[0];
+
+          if (firstAct) {
+            setSelectedUnitActivityId(firstAct.id);
             if (!payment?.amount) {
-              const suggested = targetActivity.estimated_cost * (targetActivity.progress_percentage / 100);
+              const suggested = firstAct.estimated_cost * (firstAct.progress_percentage / 100);
               setAmountValue(suggested > 0 ? String(suggested) : "");
             }
           }
-        } else if (loadedContractors.length > 0 && !selectedContractorName) {
-          setSelectedContractorName(
-            formatContractorLabel(loadedContractors[0].company_name, loadedContractors[0].full_name)
-          );
+        } else if (loadedActivities.length > 0) {
+          const firstAct = loadedActivities[0];
+          setSelectedContractorName(firstAct.contractor_name || "");
+          setSelectedUnitId(firstAct.unit_id);
+          setSelectedUnitActivityId(firstAct.id);
         }
       } catch (err) {
         console.error("Error loading payment connection data:", err);
@@ -230,42 +242,38 @@ export default function PaymentFormModal({
   }, [isOpen, projectId, unitActivityId, contractors]);
 
   // Derived: Available Units for Selected Contractor
-  const availableUnits = Array.from(
+  const allUnits = Array.from(
+    new Map(rawActivities.map((a) => [a.unit_id, { unit_id: a.unit_id, label: `${a.block_name} — Unit ${a.unit_number}` }])).values()
+  );
+
+  const contractorUnits = Array.from(
     new Map(
       rawActivities
         .filter((a) => {
-          if (!selectedContractorName) return true;
+          if (!selectedContractorName) return false;
           return (
             a.contractor_name === selectedContractorName ||
-            a.contractor_company === selectedContractorName ||
-            selectedContractorName.includes(a.contractor_company)
+            (a.contractor_company && selectedContractorName.includes(a.contractor_company))
           );
         })
         .map((a) => [a.unit_id, { unit_id: a.unit_id, label: `${a.block_name} — Unit ${a.unit_number}` }])
     ).values()
   );
 
-  const displayUnits =
-    availableUnits.length > 0
-      ? availableUnits
-      : Array.from(
-          new Map(rawActivities.map((a) => [a.unit_id, { unit_id: a.unit_id, label: `${a.block_name} — Unit ${a.unit_number}` }])).values()
-        );
+  const displayUnits = contractorUnits.length > 0 ? contractorUnits : allUnits;
 
-  const availableActivities = rawActivities.filter((a) => {
+  // Derived: Available Activities for Selected Contractor AND Selected Unit
+  const contractorUnitActivities = rawActivities.filter((a) => {
     const matchesUnit = selectedUnitId ? a.unit_id === selectedUnitId : true;
     const matchesContractor = selectedContractorName
       ? a.contractor_name === selectedContractorName ||
-        a.contractor_company === selectedContractorName ||
-        selectedContractorName.includes(a.contractor_company)
-      : true;
+        (a.contractor_company && selectedContractorName.includes(a.contractor_company))
+      : false;
     return matchesUnit && matchesContractor;
   });
 
-  const displayActivities =
-    availableActivities.length > 0
-      ? availableActivities
-      : rawActivities.filter((a) => (selectedUnitId ? a.unit_id === selectedUnitId : true));
+  const unitFallbackActivities = rawActivities.filter((a) => (selectedUnitId ? a.unit_id === selectedUnitId : true));
+  const displayActivities = contractorUnitActivities.length > 0 ? contractorUnitActivities : unitFallbackActivities.length > 0 ? unitFallbackActivities : rawActivities;
 
   const selectedActivity = rawActivities.find((a) => a.id === selectedUnitActivityId);
 
@@ -273,27 +281,29 @@ export default function PaymentFormModal({
   function handleContractorChange(newContractor: string) {
     setSelectedContractorName(newContractor);
 
+    // 1. Find units for this new contractor
     const unitsForContractor = Array.from(
       new Map(
         rawActivities
-          .filter((a) => a.contractor_name === newContractor || a.contractor_company === newContractor || newContractor.includes(a.contractor_company))
+          .filter((a) => a.contractor_name === newContractor || (a.contractor_company && newContractor.includes(a.contractor_company)))
           .map((a) => [a.unit_id, a.unit_id])
       ).values()
     );
 
     const nextUnitId = unitsForContractor.includes(selectedUnitId)
       ? selectedUnitId
-      : unitsForContractor[0] || displayUnits[0]?.unit_id || "";
+      : unitsForContractor[0] || displayUnits[0]?.unit_id || allUnits[0]?.unit_id || "";
 
     setSelectedUnitId(nextUnitId);
 
+    // 2. Find activities for this contractor and unit
     const acts = rawActivities.filter(
       (a) =>
         (a.unit_id === nextUnitId) &&
-        (a.contractor_name === newContractor || a.contractor_company === newContractor || newContractor.includes(a.contractor_company))
+        (a.contractor_name === newContractor || (a.contractor_company && newContractor.includes(a.contractor_company)))
     );
 
-    const nextAct = acts[0] || rawActivities.find((a) => a.unit_id === nextUnitId);
+    const nextAct = acts[0] || rawActivities.find((a) => a.unit_id === nextUnitId) || rawActivities[0];
     if (nextAct) {
       setSelectedUnitActivityId(nextAct.id);
       if (!payment?.amount) {
@@ -310,13 +320,11 @@ export default function PaymentFormModal({
       (a) =>
         a.unit_id === newUnitId &&
         (selectedContractorName
-          ? a.contractor_name === selectedContractorName ||
-            a.contractor_company === selectedContractorName ||
-            selectedContractorName.includes(a.contractor_company)
+          ? a.contractor_name === selectedContractorName || (a.contractor_company && selectedContractorName.includes(a.contractor_company))
           : true)
     );
 
-    const nextAct = acts[0] || rawActivities.find((a) => a.unit_id === newUnitId);
+    const nextAct = acts[0] || rawActivities.find((a) => a.unit_id === newUnitId) || rawActivities[0];
     if (nextAct) {
       setSelectedUnitActivityId(nextAct.id);
       if (!payment?.amount) {
@@ -330,7 +338,7 @@ export default function PaymentFormModal({
     setSelectedUnitActivityId(newActivityId);
     const act = rawActivities.find((a) => a.id === newActivityId);
     if (act) {
-      if (act.contractor_name !== "Unassigned" && !selectedContractorName) {
+      if (act.contractor_name && act.contractor_name !== "Unassigned" && !selectedContractorName) {
         setSelectedContractorName(act.contractor_name);
       }
       if (!payment?.amount) {
@@ -426,6 +434,7 @@ export default function PaymentFormModal({
             )}
 
             <form action={handleSubmit} className="space-y-4">
+              {/* 1. First Dropdown: Contractor (Paid To) */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
@@ -449,22 +458,24 @@ export default function PaymentFormModal({
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-xs sm:text-sm font-semibold cursor-pointer"
                   >
                     {contractorList.length > 0 ? (
-                      contractorList.map((c) => {
-                        const label = formatContractorLabel(c.company_name, c.full_name);
-                        return (
-                          <option key={c.id} value={label}>
-                            🏢 {label}
-                          </option>
-                        );
-                      })
-                    ) : rawActivities.length > 0 ? (
-                      Array.from(new Set(rawActivities.map((a) => a.contractor_name))).map((cName) => (
-                        <option key={cName} value={cName}>
-                          🏢 {cName}
-                        </option>
-                      ))
+                      contractorList
+                        .filter((c) => c.company_name && c.company_name !== "Unassigned")
+                        .map((c) => {
+                          const label = formatContractorLabel(c.company_name, c.full_name);
+                          return (
+                            <option key={c.id} value={label}>
+                              🏢 {label}
+                            </option>
+                          );
+                        })
                     ) : (
-                      <option value="Apex Civil Structures — Amit Patel">🏢 Apex Civil Structures — Amit Patel</option>
+                      rawActivities
+                        .filter((a) => a.contractor_name && a.contractor_name !== "Unassigned")
+                        .map((a) => (
+                          <option key={a.id} value={a.contractor_name}>
+                            🏢 {a.contractor_name}
+                          </option>
+                        ))
                     )}
                   </select>
                 ) : (
@@ -480,6 +491,7 @@ export default function PaymentFormModal({
                 )}
               </div>
 
+              {/* 2. Second Dropdown: Unit */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                   2. Project Unit *
@@ -499,11 +511,12 @@ export default function PaymentFormModal({
                       </option>
                     ))
                   ) : (
-                    <option value="">No units found for this contractor</option>
+                    <option value="">No units found</option>
                   )}
                 </select>
               </div>
 
+              {/* 3. Third Dropdown: Work Activity */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
@@ -531,7 +544,7 @@ export default function PaymentFormModal({
                       </option>
                     ))
                   ) : (
-                    <option value="">No activities for this unit &amp; contractor</option>
+                    <option value="">No activities found</option>
                   )}
                 </select>
 
@@ -553,6 +566,7 @@ export default function PaymentFormModal({
                 )}
               </div>
 
+              {/* 4. Amount Paid */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                   Amount Paid (₹) *
