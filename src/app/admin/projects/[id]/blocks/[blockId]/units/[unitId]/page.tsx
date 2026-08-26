@@ -107,34 +107,33 @@ export default async function UnitActivitiesPage({ params }: UnitActivityPagePro
   const existingMasterIds = (unitActivities || []).map((a) => a.activity_master_id);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-2 sm:p-4 md:p-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
-              <Home className="w-6 h-6" />
+        <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+              <Home className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-medium flex-wrap">
+              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap">
                 <span>{unit.blocks?.projects?.name}</span>
                 <span className="text-slate-300">/</span>
                 <span>{unit.blocks?.name}</span>
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold text-slate-900 flex items-center gap-2 mt-1">
-                <span>Unit {unit.unit_number} — Activity Checklist</span>
+              <h1 className="text-base sm:text-2xl font-bold text-slate-900 mt-0.5">
+                Unit {unit.unit_number} — Activity Checklist
               </h1>
             </div>
           </div>
 
-
-          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
             <Link
               href={`/admin/projects/${projectId}/blocks/${blockId}/units/${unitId}/progress`}
               className="px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-black hover:bg-slate-200 text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-colors min-h-[40px]"
             >
               <Sparkles className="w-4 h-4 text-blue-600" />
-              <span>Live Progress Dashboard</span>
+              <span>Live Progress</span>
             </Link>
 
             <ProvisionModal
@@ -150,9 +149,8 @@ export default async function UnitActivitiesPage({ params }: UnitActivityPagePro
                 activityCount: u.unit_activities?.[0]?.count || 0,
               }))}
               contractors={projectContractors || []}
-              triggerLabel="+ Add Work Activity"
+              triggerLabel="+ Add Activity"
             />
-
           </div>
         </div>
 

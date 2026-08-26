@@ -93,43 +93,31 @@ export default async function ContractorWorkDetailPage({ params }: WorkDetailPag
       : "bg-slate-100 text-slate-700 border-slate-200";
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8 font-sans">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-2 sm:p-4 md:p-8 font-sans overflow-x-hidden">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex items-center justify-between gap-3.5">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
-              <HardHat className="w-6 h-6" />
+        <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+              <HardHat className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap">
                 <span>{project?.name}</span>
-
                 <span className="text-slate-300">/</span>
                 <span>{block?.name}</span>
                 <span className="text-slate-300">/</span>
                 <span className="text-slate-800 font-bold">Unit {unit?.unit_number}</span>
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold text-slate-900 mt-0.5">
+              <h1 className="text-base sm:text-2xl font-bold text-slate-900 mt-0.5">
                 {activity.activity_master?.name}
               </h1>
             </div>
           </div>
 
-          <span className="px-3 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-full text-xs font-semibold uppercase">
-            Contractor Read-Only
+          <span className="px-2.5 py-1 bg-slate-100 border border-slate-200 text-slate-700 rounded-full text-[10px] sm:text-xs font-semibold uppercase shrink-0">
+            Read-Only
           </span>
-        </div>
-
-        {/* Engineer Verified Banner */}
-        <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-blue-900 flex items-start gap-3 shadow-sm">
-          <ClipboardCheck className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
-          <div className="text-xs sm:text-sm">
-            <p className="font-bold text-blue-900">Site Engineer Verification Policy</p>
-            <p className="text-slate-600 mt-0.5 font-normal">
-              Work progress and milestone completion are formally inspected and verified by the assigned Site Engineer. All logged records below are official inspection reports.
-            </p>
-          </div>
         </div>
 
         {/* Activity Summary Card */}

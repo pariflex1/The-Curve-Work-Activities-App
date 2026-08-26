@@ -43,31 +43,28 @@ export default async function BlockDetailPage({ params }: BlockDetailPageProps) 
   const activeUnitsCount = units?.filter((u) => u.status === "active").length || 0;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-2 sm:p-4 md:p-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
-              <Layers className="w-6 h-6" />
+        <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+              <Layers className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-slate-500 text-xs sm:text-sm font-medium">{project.name}</span>
-
                 <span className="text-slate-300">/</span>
-                <h1 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-1.5">
-                  <Layers className="w-5 h-5 text-blue-600 shrink-0" />
-                  <span>{block.name} — Units Inventory</span>
+                <h1 className="text-base sm:text-xl font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>{block.name} — Units</span>
                 </h1>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Manage residential or commercial units, floors, and specifications within this block
-              </p>
             </div>
           </div>
 
-          <UnitFormModal projectId={projectId} blockId={blockId} />
+          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+            <UnitFormModal projectId={projectId} blockId={blockId} />
+          </div>
         </div>
 
         {/* Overview Stats */}

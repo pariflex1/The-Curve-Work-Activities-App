@@ -100,28 +100,27 @@ export default async function EmployeeUnitPage({ params }: EmployeeUnitPageProps
   const existingMasterIds = (activities || []).map((a) => a.activity_master_id);
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-2 sm:p-4 md:p-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
-              <Home className="w-6 h-6" />
+        <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+              <Home className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-medium flex-wrap">
+              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap">
                 <span>{unit.blocks?.projects?.name}</span>
                 <span className="text-slate-300">/</span>
                 <span>{unit.blocks?.name}</span>
               </div>
-              <h1 className="text-lg sm:text-2xl font-bold text-slate-900 flex items-center gap-2 mt-1">
-                <span>Unit {unit.unit_number} — Site Inspection &amp; Activities</span>
+              <h1 className="text-base sm:text-2xl font-bold text-slate-900 mt-0.5">
+                Unit {unit.unit_number} — Activities &amp; Inspection
               </h1>
             </div>
           </div>
 
-
-          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
             <ProvisionModal
               unitId={unitId}
               projectId={projectId}
@@ -140,31 +139,28 @@ export default async function EmployeeUnitPage({ params }: EmployeeUnitPageProps
         </div>
 
         {/* Overview Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <p className="text-xs uppercase tracking-wider font-semibold text-slate-500">Total Activities</p>
-            <p className="text-2xl sm:text-3xl font-bold text-black mt-1">{activities?.length || 0}</p>
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
+          <div className="bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm">
+            <p className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-slate-500">Activities</p>
+            <p className="text-lg sm:text-3xl font-bold text-black mt-0.5 sm:mt-1">{activities?.length || 0}</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <p className="text-xs uppercase tracking-wider font-semibold text-blue-700">Available Contractors</p>
-            <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-1">{projectContractors?.length || 0}</p>
+          <div className="bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm">
+            <p className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-blue-700">Contractors</p>
+            <p className="text-lg sm:text-3xl font-bold text-blue-600 mt-0.5 sm:mt-1">{projectContractors?.length || 0}</p>
           </div>
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-            <p className="text-xs uppercase tracking-wider font-semibold text-slate-500">Unit Type</p>
-            <p className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">{unit.unit_type || "Standard"}</p>
+          <div className="bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm">
+            <p className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-slate-500">Type</p>
+            <p className="text-sm sm:text-2xl font-bold text-slate-900 mt-0.5 sm:mt-1 truncate">{unit.unit_type || "Std"}</p>
           </div>
         </div>
 
         {/* Activities Table */}
         <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-bold text-black flex items-center gap-2">
-              <ClipboardCheck className="w-5 h-5 text-black" />
-              <span>Site Inspection &amp; Progress Verification Checklist</span>
+          <div className="p-3.5 sm:p-4 border-b border-slate-200 flex items-center justify-between gap-2">
+            <h2 className="text-sm sm:text-base font-bold text-black flex items-center gap-2">
+              <ClipboardCheck className="w-4 h-4 text-black" />
+              <span>Inspection Checklist</span>
             </h2>
-            <span className="text-xs text-slate-500 font-medium">
-              Inspect contractor work on site and submit photo-verified progress reports
-            </span>
           </div>
 
           <div className="overflow-x-auto">

@@ -175,28 +175,23 @@ export default function AdminWorkPaymentConsole({ projects }: AdminWorkPaymentCo
   }));
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+    <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-sm space-y-4 sm:space-y-6">
       {/* Header & Project Selector */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-100">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-2xl bg-black text-white shadow-sm">
-              <Coins className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                Work Activities &amp; Disbursement Console
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                Real-time site progress, unit checklists &amp; direct milestone disbursements
-              </p>
-            </div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 sm:p-2.5 rounded-xl sm:rounded-2xl bg-black text-white shadow-sm shrink-0">
+            <Coins className="w-4 sm:w-5 h-4 sm:h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Work Activities &amp; Disbursements
+            </h2>
           </div>
         </div>
 
-        {/* Step 1: Project Selector */}
-        <div className="flex items-center gap-3 self-start lg:self-auto bg-slate-50 border border-slate-200 p-1.5 rounded-2xl shadow-inner">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-600 pl-2.5 shrink-0 flex items-center gap-1.5">
+        {/* Project Selector */}
+        <div className="flex items-center gap-2 self-stretch sm:self-auto bg-slate-50 border border-slate-200 p-1 rounded-xl sm:rounded-2xl">
+          <label className="text-xs font-bold uppercase tracking-wider text-slate-600 pl-2 shrink-0 flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-slate-500" />
             <span>Project:</span>
           </label>
@@ -211,7 +206,7 @@ export default function AdminWorkPaymentConsole({ projects }: AdminWorkPaymentCo
                 setSelectedUnitId(firstUnit.id);
               }
             }}
-            className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 font-bold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-black cursor-pointer shadow-sm min-w-[220px]"
+            className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg sm:rounded-xl bg-white border border-slate-200 text-slate-900 font-bold text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-black cursor-pointer shadow-sm min-w-0 sm:min-w-[220px]"
           >
             {projects.map((p) => (
               <option key={p.id} value={p.id}>
@@ -223,15 +218,15 @@ export default function AdminWorkPaymentConsole({ projects }: AdminWorkPaymentCo
       </div>
 
       {/* Main 2-Column Workflow: Left = Unit Selection | Right = Work Activities & Payments */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
 
-        {/* Step 2: Unit Picker (4 cols on lg) */}
-        <div className="lg:col-span-4 space-y-3.5">
+        {/* Unit Picker (4 cols on lg) */}
+        <div className="lg:col-span-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Home className="w-4 h-4 text-black" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
-                1. Select Unit ({filteredUnits.length}/{allUnits.length})
+              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900">
+                Units ({filteredUnits.length}/{allUnits.length})
               </h3>
             </div>
             {activeProject && (
@@ -355,13 +350,13 @@ export default function AdminWorkPaymentConsole({ projects }: AdminWorkPaymentCo
           </div>
         </div>
 
-        {/* Step 3: Work Activities & Payments for Selected Unit (8 cols on lg) */}
-        <div className="lg:col-span-8 space-y-3.5">
+        {/* Work Activities & Payments for Selected Unit (8 cols on lg) */}
+        <div className="lg:col-span-8 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-emerald-600" />
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
-                2. Work Activities for {activeUnit ? `${activeUnit.block_name} — Unit ${activeUnit.unit_number}` : "Unit"}
+              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900">
+                Work Activities {activeUnit ? `• ${activeUnit.block_name} — Unit ${activeUnit.unit_number}` : ""}
               </h3>
             </div>
 
@@ -370,7 +365,7 @@ export default function AdminWorkPaymentConsole({ projects }: AdminWorkPaymentCo
                 href={`/admin/projects/${activeProject.id}/blocks/${activeUnit.block_id}/units/${activeUnit.id}`}
                 className="text-xs font-semibold text-slate-700 hover:text-black flex items-center gap-1 transition-colors"
               >
-                <span>Full Unit Checklist</span>
+                <span>Full Checklist</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </Link>
             )}

@@ -69,35 +69,30 @@ export default async function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between">
+    <main className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between overflow-x-hidden">
       {/* Top Navigation */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             <img
               src="/the-curve-logo.webp"
               alt="The Curve Consultants"
-              className="h-10 sm:h-12 w-auto object-contain"
+              className="h-9 sm:h-12 w-auto object-contain"
             />
             <div>
-              <span className="font-bold text-xl sm:text-2xl text-black tracking-tight block leading-none">
+              <span className="font-bold text-lg sm:text-2xl text-black tracking-tight block leading-none">
                 THE CURVE
               </span>
-              <span className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold mt-1 block">
-                Work &amp; Payment System
+              <span className="text-[10px] sm:text-[11px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5 sm:mt-1 block">
+                Work &amp; Payments
               </span>
             </div>
           </div>
 
-
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <PWAInstallButton />
-            <UserManualModal role={(userRole as UserRoleType) || "admin"} triggerLabel="User Manual" />
             {user ? (
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-600 hidden sm:inline font-normal">
-                  Signed in as <strong className="text-black font-semibold">{userName || user.email}</strong>
-                </span>
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Link
                   href={
                     userRole === "admin"
@@ -108,17 +103,17 @@ export default async function Home() {
                       ? "/contractor"
                       : "/owner"
                   }
-                  className="px-5 py-2.5 bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold tracking-wide rounded-xl shadow-sm transition-all flex items-center gap-2 min-h-[42px]"
+                  className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold tracking-wide rounded-xl shadow-sm transition-all flex items-center gap-1.5 min-h-[38px] sm:min-h-[42px]"
                 >
-                  <span>Go to Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Dashboard</span>
+                  <ArrowRight className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                 </Link>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-5 py-2.5 bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold tracking-wide rounded-xl shadow-sm transition-all min-h-[42px] flex items-center"
+                  className="px-4 sm:px-5 py-2 sm:py-2.5 bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold tracking-wide rounded-xl shadow-sm transition-all min-h-[38px] sm:min-h-[42px] flex items-center"
                 >
                   Sign In
                 </Link>
@@ -129,24 +124,15 @@ export default async function Home() {
       </header>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 w-full">
-        <div className="text-center max-w-4xl mx-auto space-y-6 mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 text-black text-xs font-bold uppercase tracking-widest shadow-sm">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-            <span>Real Estate Construction &amp; Financial Governance</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold text-black tracking-tight leading-[1.1]">
-            Master Site Progress &amp; Financial Disbursements
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-8 sm:py-16 w-full">
+        <div className="text-center max-w-4xl mx-auto space-y-4 sm:space-y-6 mb-8 sm:mb-12">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-black tracking-tight leading-tight">
+            Site Progress &amp; Financial Disbursements
           </h1>
-
-          <p className="text-slate-600 text-lg sm:text-xl font-normal max-w-2xl mx-auto leading-relaxed">
-            Multi-tenant real estate workflow system with photo-verified progress reporting, immutable audit trails, and live balance aggregation.
-          </p>
         </div>
 
         {/* Role Portals Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {portals.map((portal) => {
             const Icon = portal.icon;
             return (
@@ -183,39 +169,39 @@ export default async function Home() {
           })}
         </div>
 
-        {/* Demo Credentials Helper Card */}
-        <div className="mt-16 bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
-          <div className="flex items-center gap-2.5 mb-5">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-            <h2 className="text-lg font-bold text-black tracking-tight">
-              Pre-Configured Demo Accounts (Password: <span className="font-mono font-semibold text-black">Password123!</span>)
+        {/* Demo Credentials Card */}
+        <div className="mt-8 sm:mt-16 bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-sm">
+          <div className="flex items-center gap-2 mb-3 sm:mb-5">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <h2 className="text-sm sm:text-lg font-bold text-black tracking-tight">
+              Demo Accounts (Password: <span className="font-mono font-semibold text-black">Password123!</span>)
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-normal">
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <span className="font-bold text-black block mb-1">👑 Admin</span>
-              <span className="font-mono text-slate-700">admin@thecurve.com</span>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 text-xs font-normal">
+            <div className="bg-slate-50 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200">
+              <span className="font-bold text-black block mb-0.5">Admin</span>
+              <span className="font-mono text-slate-700 text-[11px] sm:text-xs truncate block">admin@thecurve.com</span>
             </div>
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <span className="font-bold text-black block mb-1">👷 Site Engineer</span>
-              <span className="font-mono text-slate-700">engineer@thecurve.com</span>
+            <div className="bg-slate-50 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200">
+              <span className="font-bold text-black block mb-0.5">Site Engineer</span>
+              <span className="font-mono text-slate-700 text-[11px] sm:text-xs truncate block">engineer@thecurve.com</span>
             </div>
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <span className="font-bold text-black block mb-1">🔨 Civil Contractor</span>
-              <span className="font-mono text-slate-700">apex.contractor@thecurve.com</span>
+            <div className="bg-slate-50 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200">
+              <span className="font-bold text-black block mb-0.5">Contractor</span>
+              <span className="font-mono text-slate-700 text-[11px] sm:text-xs truncate block">apex.contractor@thecurve.com</span>
             </div>
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              <span className="font-bold text-black block mb-1">📊 Project Owner</span>
-              <span className="font-mono text-slate-700">owner@thecurve.com</span>
+            <div className="bg-slate-50 p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200">
+              <span className="font-bold text-black block mb-0.5">Project Owner</span>
+              <span className="font-mono text-slate-700 text-[11px] sm:text-xs truncate block">owner@thecurve.com</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 font-semibold tracking-wide uppercase">
-          THE CURVE WORK &amp; PAYMENT SYSTEM • ENTERPRISE REAL ESTATE MANAGEMENT
+      <footer className="border-t border-slate-200 bg-white py-4 sm:py-6">
+        <div className="max-w-7xl mx-auto px-4 text-center text-[10px] sm:text-xs text-slate-500 font-semibold tracking-wide uppercase">
+          THE CURVE WORK &amp; PAYMENTS SYSTEM
         </div>
       </footer>
     </main>

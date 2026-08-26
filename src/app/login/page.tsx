@@ -20,32 +20,29 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 px-4 font-sans">
+    <main className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center py-6 sm:py-12 px-3 sm:px-6 lg:px-8 font-sans overflow-x-hidden">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-black mb-6 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-black mb-4 sm:mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Home</span>
+          <span>Home</span>
         </Link>
         <div className="flex justify-center mb-3">
-          <div className="w-12 h-12 rounded-2xl bg-black flex items-center justify-center text-white shadow-md">
+          <div className="w-11 sm:w-12 h-11 sm:h-12 rounded-2xl bg-black flex items-center justify-center text-white shadow-md">
             <Building2 className="w-6 h-6" />
           </div>
         </div>
-        <h2 className="text-center text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Sign In to Your Account
+        <h2 className="text-center text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Sign In
         </h2>
-        <p className="mt-1 text-center text-xs sm:text-sm text-slate-500">
-          The Curve Real Estate Construction &amp; Payments
-        </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-5 sm:px-10 shadow-sm border border-slate-200 rounded-3xl">
+      <div className="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-6 sm:py-8 px-4 sm:px-10 shadow-sm border border-slate-200 rounded-2xl sm:rounded-3xl">
           {error && (
-            <div className="mb-6 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-medium">
+            <div className="mb-4 sm:mb-6 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-medium">
               {error}
             </div>
           )}
@@ -103,19 +100,12 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 rounded-xl bg-black hover:bg-slate-800 text-white font-bold shadow-sm transition-all flex items-center justify-center gap-2 min-h-[46px] disabled:opacity-50 text-sm"
+              className="w-full py-3 px-4 rounded-xl bg-black hover:bg-slate-800 text-white font-bold shadow-sm transition-all flex items-center justify-center gap-2 min-h-[46px] disabled:opacity-50 text-sm cursor-pointer"
             >
               <span>{loading ? "Signing in..." : "Sign In"}</span>
               {!loading && <ArrowRight className="w-4 h-4" />}
             </button>
           </form>
-
-          <div className="mt-6 pt-5 border-t border-slate-100 text-center space-y-2">
-            <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 font-medium">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Accounts are issued and authorized by the Administrator.</span>
-            </div>
-          </div>
         </div>
       </div>
     </main>

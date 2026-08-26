@@ -161,32 +161,29 @@ export default function ManageAccountsView({ initialProfiles }: ManageAccountsVi
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Create Account Section */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-sm space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-black text-white">
-                <UserPlus className="w-5 h-5" />
+              <div className="p-2 rounded-xl bg-black text-white shrink-0">
+                <UserPlus className="w-4 sm:w-5 h-4 sm:h-5" />
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                Create &amp; Issue User Credentials
+              <h2 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
+                User Accounts &amp; Access
               </h2>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Issue mobile login accounts for Site Engineers, Contractors, and Project Owners
-            </p>
           </div>
 
           <button
             type="button"
             onClick={() => setShowCreateForm((prev) => !prev)}
-            className="px-4 py-2.5 rounded-xl bg-black hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-black hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2 self-start sm:self-auto cursor-pointer"
           >
-            <UserPlus className="w-4 h-4" />
-            <span>{showCreateForm ? "Collapse Form" : "+ New User Account"}</span>
-            {showCreateForm ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>{showCreateForm ? "Collapse" : "+ New User"}</span>
+            {showCreateForm ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
         </div>
 
@@ -344,15 +341,12 @@ export default function ManageAccountsView({ initialProfiles }: ManageAccountsVi
       </div>
 
       {/* Directory & Management Table */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-sm space-y-4 sm:space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-slate-900">
+            <h3 className="text-base sm:text-xl font-bold text-slate-900">
               Accounts Directory ({filteredProfiles.length})
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Live user database, mobile identifiers, and credentials governance
-            </p>
           </div>
 
           {/* Search & Filter Controls */}

@@ -408,45 +408,36 @@ export default function ReportsView({
       </div>
 
       {/* Screen Header & Action Buttons */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6 print:hidden">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
-            <FileText className="w-6 h-6" />
+      <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 print:hidden">
+        <div className="flex items-center gap-3">
+          <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+            <FileText className="w-5 sm:w-6 h-5 sm:h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200">
-                Custom Reporting Engine
-              </span>
-              <span className="text-xs text-slate-400 font-mono">Live Data</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
-              Customized Reports &amp; Analytics
+            <h1 className="text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Reports &amp; Analytics
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Filter by unit, contractor, timeline, activity category; export to <strong>CSV</strong> or <strong>Print / PDF</strong>
-            </p>
           </div>
         </div>
 
         {/* Action Buttons: Print & CSV Export */}
-        <div className="flex items-center gap-3 self-start lg:self-auto flex-wrap">
+        <div className="flex items-center gap-2.5 self-start lg:self-auto flex-wrap">
           <button
             type="button"
             onClick={handleExportCSV}
-            className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-2xs border border-slate-200 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all shadow-2xs border border-slate-200 cursor-pointer"
           >
-            <Download className="w-4 h-4 text-slate-700" />
-            <span>Export CSV</span>
+            <Download className="w-3.5 h-3.5 text-slate-700" />
+            <span>CSV</span>
           </button>
 
           <button
             type="button"
             onClick={handlePrint}
-            className="px-5 py-2.5 rounded-xl bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
           >
-            <Printer className="w-4 h-4" />
-            <span>Print / Save PDF</span>
+            <Printer className="w-3.5 h-3.5" />
+            <span>Print / PDF</span>
           </button>
         </div>
       </div>
@@ -483,12 +474,12 @@ export default function ReportsView({
       </div>
 
       {/* Interactive Customization & Filter Control Panel */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5 print:hidden">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+      <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-sm space-y-4 sm:space-y-5 print:hidden">
+        <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-slate-700" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900">
-              Customize Report Filters
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900">
+              Filters
             </h3>
           </div>
 
@@ -690,15 +681,12 @@ export default function ReportsView({
       </div>
 
       {/* Main Report Table Display */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+      <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 capitalize">
               {reportType.replace("_", " ")} Report
             </h3>
-            <p className="text-xs text-slate-500">
-              Showing matching customized records
-            </p>
           </div>
         </div>
 

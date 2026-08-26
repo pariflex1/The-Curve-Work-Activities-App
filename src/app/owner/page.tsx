@@ -77,37 +77,34 @@ export default async function OwnerDashboard() {
   const balanceDue = totalEstimatedCost - totalPaid;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-2 sm:p-4 md:p-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
+        <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <img
               src="/the-curve-logo.webp"
               alt="The Curve Logo"
-              className="h-10 sm:h-12 w-auto object-contain shrink-0"
+              className="h-9 sm:h-11 w-auto object-contain shrink-0"
             />
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                Owner Financial Portfolio
+              <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
+                Financial Portfolio
               </h1>
-
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                Welcome, <strong className="text-slate-800">{profile?.full_name || "Owner"}</strong> — Portfolio Balances &amp; Payment Ledger
+              <p className="text-xs text-slate-500">
+                {profile?.full_name || "Owner"}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
             <PWAInstallButton />
-            <UserManualModal role="owner" triggerLabel="Owner Guide" />
             <form action={signOut}>
-
               <button
                 type="submit"
-                className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs sm:text-sm font-semibold transition-colors min-h-[40px] flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold transition-colors min-h-[38px] flex items-center gap-1.5"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out</span>
               </button>
             </form>
@@ -115,44 +112,41 @@ export default async function OwnerDashboard() {
         </div>
 
         {/* Financial Summary KPIs */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs uppercase tracking-wider font-semibold text-slate-500">
-                Portfolio Estimated Cost
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+          <div className="bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-slate-500">
+                Est. Cost
               </span>
-              <Coins className="w-5 h-5 text-blue-600" />
+              <Coins className="w-4 h-4 text-blue-600" />
             </div>
-            <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
+            <p className="text-xl sm:text-3xl font-extrabold text-slate-900">
               ₹{totalEstimatedCost.toLocaleString("en-IN")}
             </p>
-            <p className="text-xs text-slate-500 mt-2">Across all assigned development projects</p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs uppercase tracking-wider font-semibold text-slate-500">
-                Total Disbursed (Paid)
+          <div className="bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-slate-500">
+                Total Paid
               </span>
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             </div>
-            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">
+            <p className="text-xl sm:text-3xl font-extrabold text-emerald-600">
               ₹{totalPaid.toLocaleString("en-IN")}
             </p>
-            <p className="text-xs text-slate-500 mt-2">Verified disbursed disbursements</p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs uppercase tracking-wider font-semibold text-slate-500">
-                Outstanding Balance
+          <div className="bg-white border border-slate-200 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider font-semibold text-slate-500">
+                Balance
               </span>
-              <Clock className="w-5 h-5 text-purple-600" />
+              <Clock className="w-4 h-4 text-purple-600" />
             </div>
-            <p className="text-2xl sm:text-3xl font-extrabold text-purple-700 mt-1">
+            <p className="text-xl sm:text-3xl font-extrabold text-purple-700">
               ₹{balanceDue.toLocaleString("en-IN")}
             </p>
-            <p className="text-xs text-slate-500 mt-2">Estimated Cost − Paid</p>
           </div>
         </div>
 

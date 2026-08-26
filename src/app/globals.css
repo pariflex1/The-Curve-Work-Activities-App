@@ -77,12 +77,17 @@
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    max-width: 100vw;
   }
   body {
     font-family: var(--font-lato), "Lato", -apple-system, BlinkMacSystemFont, sans-serif;
     color: #0f172a;
     background-color: #f8fafc;
     letter-spacing: -0.01em;
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-lato), "Lato", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -105,6 +110,15 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
   }
+}
+
+/* Hide scrollbar for clean horizontal tab bars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Glassmorphism and micro-animations */

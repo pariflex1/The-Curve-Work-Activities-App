@@ -126,18 +126,17 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }));
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
-
-      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-2 sm:p-4 md:p-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
-              <Building2 className="w-6 h-6" />
+        <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 sm:w-12 h-10 sm:h-12 rounded-xl sm:rounded-2xl bg-black text-white flex items-center justify-center shadow-md shrink-0">
+              <Building2 className="w-5 sm:w-6 h-5 sm:h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">
                   {project.name}
                 </h1>
 
@@ -148,7 +147,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </span>
               </div>
               {project.location && (
-                <p className="text-xs sm:text-sm text-slate-500 flex items-center gap-1.5 mt-1 font-normal">
+                <p className="text-xs sm:text-sm text-slate-500 flex items-center gap-1.5 mt-0.5">
                   <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <span>{project.location}</span>
                 </p>
@@ -156,7 +155,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
             <ProjectFormModal project={project} isEdit={true} />
           </div>
         </div>
