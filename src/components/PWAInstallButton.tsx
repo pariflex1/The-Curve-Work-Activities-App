@@ -99,12 +99,18 @@ export default function PWAInstallButton({ className = "" }: { className?: strin
       title="Install The Curve App directly on your device"
       className={
         className ||
-        "px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 min-h-[40px] border border-blue-400/30 shrink-0 cursor-pointer"
+        "px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 min-h-[40px] border border-blue-400/30 shrink-0 cursor-pointer"
       }
     >
+      <img
+        src="/the-curve-logo.webp"
+        alt="The Curve Icon"
+        className="w-5 h-5 rounded-md object-contain shrink-0 bg-white/90 p-0.5"
+      />
       <Download className="w-4 h-4 text-white animate-bounce" />
       <span>Install App</span>
     </button>
   );
+
 }
 
