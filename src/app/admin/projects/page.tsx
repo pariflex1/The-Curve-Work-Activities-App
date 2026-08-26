@@ -165,15 +165,10 @@ export default async function ProjectsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-2">
-                    <PaymentFormModal
-                      projectId={project.id}
-                      triggerLabel="Pay"
-                    />
-
+                  <div className="pt-2">
                     <Link
                       href={`/admin/projects/${project.id}`}
-                      className="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-black border border-slate-200 hover:border-black text-slate-700 hover:text-white flex items-center justify-center gap-1.5 font-semibold transition-all text-xs min-h-[40px]"
+                      className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-black border border-slate-200 hover:border-black text-slate-700 hover:text-white flex items-center justify-center gap-1.5 font-semibold transition-all text-xs min-h-[40px]"
                     >
                       <span>Manage Hierarchy &amp; Team</span>
                       <ChevronRight className="w-4 h-4" />
@@ -182,6 +177,7 @@ export default async function ProjectsPage() {
                 </div>
               );
             })
+
           ) : (
             <div className="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-slate-200 shadow-sm p-6">
               <Building2 className="w-12 h-12 text-slate-400 mx-auto mb-3" />

@@ -34,6 +34,22 @@ export async function createPayment(formData: FormData) {
     return { error: "Payment amount must be greater than 0." };
   }
 
+  if (!paidTo || paidTo.trim() === "" || paidTo.toLowerCase().includes("unassigned")) {
+    return { error: "Cannot record payment to an unassigned contractor. Please assign a contractor first." };
+  }
+
+  // Verify that the target unit activity has an assigned contractor
+  const { data: targetAct } = await supabase
+    .from("unit_activities")
+    .select("id, contractor_id")
+    .eq("id", unitActivityId)
+    .single();
+
+  if (!targetAct || !targetAct.contractor_id) {
+    return { error: "This work activity is unassigned. Please assign a contractor before recording payment." };
+  }
+
+
 
   const { data, error } = await supabase
     .from("payments")

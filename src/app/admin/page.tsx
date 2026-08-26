@@ -207,7 +207,7 @@ export default async function AdminDashboard() {
           <h2 className="text-2xl sm:text-3xl font-bold text-black tracking-tight">
             Management Modules
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white border border-slate-200 rounded-3xl p-7 shadow-sm flex flex-col justify-between">
               <div>
                 <div className="w-14 h-14 rounded-2xl bg-slate-100 text-black flex items-center justify-center mb-5">
@@ -224,27 +224,6 @@ export default async function AdminDashboard() {
                 <UserManagementModal profiles={allProfiles || []} triggerLabel="Open User Directory" />
               </div>
             </div>
-
-            <Link
-              href="/admin/projects"
-              className="bg-white border border-slate-200 hover:border-black rounded-3xl p-7 shadow-sm hover:shadow-xl transition-all group flex flex-col justify-between"
-            >
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-slate-100 text-black group-hover:bg-black group-hover:text-white flex items-center justify-center mb-5 transition-colors">
-                  <Building2 className="w-7 h-7" />
-                </div>
-                <h3 className="text-xl font-bold text-black tracking-tight group-hover:translate-x-0.5 transition-transform">
-                  Project &amp; Team Hierarchy
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500 font-normal mt-2 leading-relaxed">
-                  Configure projects, create structural blocks, add units, and assign employee/contractor teams.
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-black uppercase tracking-wider">
-                <span>View Projects</span>
-                <ChevronRight className="w-4 h-4" />
-              </div>
-            </Link>
 
             <Link
               href="/admin/activity-master"
@@ -266,6 +245,7 @@ export default async function AdminDashboard() {
                 <ChevronRight className="w-4 h-4" />
               </div>
             </Link>
+
 
             <Link
               href="/admin/audit-logs"

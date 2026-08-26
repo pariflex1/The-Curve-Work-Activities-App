@@ -448,6 +448,8 @@ export default function AdminWorkPaymentConsole({ projects }: AdminWorkPaymentCo
                 );
                 const remainingBal = estCost - totalPaidForActivity;
 
+                const isUnassigned = !cCompany || contractorLabel === "Unassigned Contractor" || !act.project_contractors;
+
                 return (
                   <div
                     key={act.id}
@@ -466,21 +468,38 @@ export default function AdminWorkPaymentConsole({ projects }: AdminWorkPaymentCo
                         </div>
                         <p className="text-xs text-slate-600 mt-1 flex items-center gap-1.5 font-medium">
                           <span className="text-slate-400">Assigned:</span>
-                          <strong className="text-slate-800">🏢 {contractorLabel}</strong>
+                          {isUnassigned ? (
+                            <span className="inline-flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md font-semibold border border-amber-200/60 text-[11px]">
+                              ⚠️ Unassigned
+                            </span>
+                          ) : (
+                            <strong className="text-slate-800">🏢 {contractorLabel}</strong>
+                          )}
                         </p>
                       </div>
 
-                      {/* Direct Activity Payment Modal Trigger */}
+                      {/* Payment Trigger vs Assign Prompt */}
                       <div className="shrink-0">
-                        <PaymentFormModal
-                          projectId={activeProject.id}
-                          unitActivityId={act.id}
-                          contractors={contractorsList}
-                          hideHierarchySelectors={true}
-                          triggerLabel="Record Payment"
-                        />
+                        {isUnassigned ? (
+                          <Link
+                            href={`/admin/projects/${activeProject.id}/blocks/${activeUnit.block_id}/units/${activeUnit.id}`}
+                            className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                            title="Assign a contractor to enable payment recording"
+                          >
+                            <span>+ Assign Contractor</span>
+                          </Link>
+                        ) : (
+                          <PaymentFormModal
+                            projectId={activeProject.id}
+                            unitActivityId={act.id}
+                            contractors={contractorsList}
+                            hideHierarchySelectors={true}
+                            triggerLabel="Record Payment"
+                          />
+                        )}
                       </div>
                     </div>
+
 
                     {/* Progress Bar & Financials */}
                     <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">

@@ -159,13 +159,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-            <PaymentFormModal
-              projectId={id}
-              triggerLabel="Make Payment"
-            />
             <ProjectFormModal project={project} isEdit={true} />
           </div>
         </div>
+
 
         {/* Overview & Financial KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
