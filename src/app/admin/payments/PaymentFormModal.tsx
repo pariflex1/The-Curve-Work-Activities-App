@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, X, Coins, Trash2 } from "lucide-react";
-import { createPayment, updatePayment, deletePayment } from "./payment-actions";
-import { createClient as createBrowserClient } from "@/utils/supabase/client";
+import { createPayment, updatePayment, deletePayment, getPaymentFormContext } from "./payment-actions";
 
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
@@ -58,6 +57,7 @@ export default function PaymentFormModal({
   const [useCustomRecipient, setUseCustomRecipient] = useState(false);
 
   const [contractorList, setContractorList] = useState<ContractorOption[]>(contractors);
+  const [allUnitsList, setAllUnitsList] = useState<{ unit_id: string; label: string }[]>([]);
   const [rawActivities, setRawActivities] = useState<RawActivityItem[]>([]);
   
   // 3 Linked Dropdown States
@@ -82,151 +82,72 @@ export default function PaymentFormModal({
     async function loadData() {
       setFetchingData(true);
       try {
-        const supabase = createBrowserClient();
+        const res = await getPaymentFormContext(projectId);
+        if (!isMounted) return;
 
-        // 1. Fetch project contractors
-        const { data: pc } = await supabase
-          .from("project_contractors")
-          .select("id, company_name, profile_id, profiles(full_name)")
-          .eq("project_id", projectId);
+        const loadedContractors = res.contractors || [];
+        const loadedUnits = res.units || [];
+        const loadedActivities = res.activities || [];
 
-        let validContractors: ContractorOption[] = [];
-        if (pc && pc.length > 0) {
-          validContractors = pc
-            .filter((c: any) => c.company_name || c.profiles?.full_name)
-            .map((c: any) => ({
-              id: c.id,
-              company_name: c.company_name || "Contractor",
-              full_name: c.profiles?.full_name || null,
-            }));
-        } else if (contractors && contractors.length > 0) {
-          validContractors = contractors;
-        } else {
-          const { data: profs } = await supabase
-            .from("profiles")
-            .select("id, full_name, company_name")
-            .eq("role", "contractor");
+        setContractorList(loadedContractors);
+        setAllUnitsList(loadedUnits);
+        setRawActivities(loadedActivities);
 
-          if (profs && profs.length > 0) {
-            validContractors = profs.map((p: any) => ({
-              id: p.id,
-              company_name: p.company_name || p.full_name,
-              full_name: p.full_name,
-            }));
+        // Determine default contractor
+        let defaultContractorName = payment?.paid_to || "";
+        if (!defaultContractorName && loadedContractors.length > 0) {
+          defaultContractorName = formatContractorLabel(loadedContractors[0].company_name, loadedContractors[0].full_name);
+        } else if (!defaultContractorName && loadedActivities.length > 0) {
+          const actWithContractor = loadedActivities.find((a) => a.contractor_name);
+          if (actWithContractor) {
+            defaultContractorName = actWithContractor.contractor_name;
           }
         }
+        setSelectedContractorName(defaultContractorName);
 
-        if (isMounted) {
-          setContractorList(validContractors);
+        // Determine default unit
+        let targetUnitId = "";
+        if (unitActivityId) {
+          const act = loadedActivities.find((a) => a.id === unitActivityId);
+          if (act) targetUnitId = act.unit_id;
         }
-
-        // 2. Fetch blocks & units for this project
-        const { data: blocks } = await supabase
-          .from("blocks")
-          .select("id, name, units(id, unit_number)")
-          .eq("project_id", projectId);
-
-        const unitMap: Record<string, { unitNumber: string; blockName: string }> = {};
-        const unitIds: string[] = [];
-        const allUnitsList: { unit_id: string; label: string }[] = [];
-
-        (blocks || []).forEach((b: any) => {
-          (b.units || []).forEach((u: any) => {
-            unitIds.push(u.id);
-            const label = `${b.name} — Unit ${u.unit_number}`;
-            unitMap[u.id] = { unitNumber: u.unit_number, blockName: b.name };
-            allUnitsList.push({ unit_id: u.id, label });
-          });
-        });
-
-        let loadedActivities: RawActivityItem[] = [];
-
-        if (unitIds.length > 0) {
-          const { data: ua } = await supabase
-            .from("unit_activities")
-            .select(`
-              id,
-              unit_id,
-              contractor_id,
-              estimated_cost,
-              progress_percentage,
-              activity_master ( name ),
-              project_contractors (
-                id,
-                company_name,
-                profiles ( full_name )
-              )
-            `)
-            .in("unit_id", unitIds);
-
-          if (!isMounted) return;
-
-          if (ua && ua.length > 0) {
-            loadedActivities = ua.map((item: any) => {
-              const info = unitMap[item.unit_id] || { unitNumber: "Unit", blockName: "Block" };
-              const activityName = item.activity_master?.name || "Activity";
-              const cCompany = item.project_contractors?.company_name || "";
-              const cPerson = item.project_contractors?.profiles?.full_name || "";
-              const cId = item.contractor_id || item.project_contractors?.id || null;
-              const cName = cCompany ? formatContractorLabel(cCompany, cPerson) : "";
-
-              return {
-                id: item.id,
-                unit_id: item.unit_id,
-                unit_number: info.unitNumber,
-                block_name: info.blockName,
-                activity_name: activityName,
-                contractor_id: cId,
-                contractor_name: cName,
-                contractor_company: cCompany,
-                contractor_person: cPerson,
-                estimated_cost: Number(item.estimated_cost) || 0,
-                progress_percentage: Number(item.progress_percentage) || 0,
-              };
-            });
-
-            setRawActivities(loadedActivities);
-          }
-        }
-
-        // 3. Initialize default selections for 3 cascading dropdowns
-        if (validContractors.length > 0) {
-          const defaultContractor = validContractors[0];
-          const defaultContractorLabel = formatContractorLabel(defaultContractor.company_name, defaultContractor.full_name);
-          const initialContractor = payment?.paid_to || defaultContractorLabel;
-          setSelectedContractorName(initialContractor);
-
-          const matchingActs = loadedActivities.filter(
-            (a) =>
-              a.contractor_name === initialContractor ||
-              a.contractor_company === defaultContractor.company_name ||
-              (defaultContractor.company_name && a.contractor_name.includes(defaultContractor.company_name)) ||
-              a.contractor_id === defaultContractor.id
+        if (!targetUnitId && defaultContractorName) {
+          const matchingAct = loadedActivities.find(
+            (a) => a.contractor_name === defaultContractorName || defaultContractorName.includes(a.contractor_company)
           );
+          if (matchingAct) targetUnitId = matchingAct.unit_id;
+        }
+        if (!targetUnitId && loadedUnits.length > 0) {
+          targetUnitId = loadedUnits[0].unit_id;
+        }
+        setSelectedUnitId(targetUnitId);
 
-          const candidateUnits = matchingActs.length > 0 ? matchingActs : loadedActivities;
-          const firstUnitId = candidateUnits[0]?.unit_id || allUnitsList[0]?.unit_id || "";
-          setSelectedUnitId(firstUnitId);
+        // Determine default activity
+        let targetActivityId = unitActivityId || "";
+        if (!targetActivityId && targetUnitId) {
+          const match = loadedActivities.find(
+            (a) =>
+              a.unit_id === targetUnitId &&
+              (defaultContractorName ? a.contractor_name === defaultContractorName || defaultContractorName.includes(a.contractor_company) : true)
+          ) || loadedActivities.find((a) => a.unit_id === targetUnitId) || loadedActivities[0];
 
-          const firstAct = candidateUnits.find((a) => a.unit_id === firstUnitId) ||
-            loadedActivities.find((a) => a.unit_id === firstUnitId) ||
-            loadedActivities[0];
+          if (match) targetActivityId = match.id;
+        } else if (!targetActivityId && loadedActivities.length > 0) {
+          targetActivityId = loadedActivities[0].id;
+        }
 
-          if (firstAct) {
-            setSelectedUnitActivityId(firstAct.id);
-            if (!payment?.amount) {
-              const suggested = firstAct.estimated_cost * (firstAct.progress_percentage / 100);
-              setAmountValue(suggested > 0 ? String(suggested) : "");
-            }
+        setSelectedUnitActivityId(targetActivityId);
+
+        // Set suggested amount
+        if (!payment?.amount && targetActivityId) {
+          const act = loadedActivities.find((a) => a.id === targetActivityId);
+          if (act) {
+            const suggested = act.estimated_cost * (act.progress_percentage / 100);
+            setAmountValue(suggested > 0 ? String(suggested) : "");
           }
-        } else if (loadedActivities.length > 0) {
-          const firstAct = loadedActivities[0];
-          setSelectedContractorName(firstAct.contractor_name || "");
-          setSelectedUnitId(firstAct.unit_id);
-          setSelectedUnitActivityId(firstAct.id);
         }
       } catch (err) {
-        console.error("Error loading payment connection data:", err);
+        console.error("Error loading payment context:", err);
       } finally {
         if (isMounted) {
           setFetchingData(false);
@@ -239,13 +160,9 @@ export default function PaymentFormModal({
     return () => {
       isMounted = false;
     };
-  }, [isOpen, projectId, unitActivityId, contractors]);
+  }, [isOpen, projectId, unitActivityId]);
 
   // Derived: Available Units for Selected Contractor
-  const allUnits = Array.from(
-    new Map(rawActivities.map((a) => [a.unit_id, { unit_id: a.unit_id, label: `${a.block_name} — Unit ${a.unit_number}` }])).values()
-  );
-
   const contractorUnits = Array.from(
     new Map(
       rawActivities
@@ -260,7 +177,7 @@ export default function PaymentFormModal({
     ).values()
   );
 
-  const displayUnits = contractorUnits.length > 0 ? contractorUnits : allUnits;
+  const displayUnits = contractorUnits.length > 0 ? contractorUnits : allUnitsList;
 
   // Derived: Available Activities for Selected Contractor AND Selected Unit
   const contractorUnitActivities = rawActivities.filter((a) => {
@@ -292,7 +209,7 @@ export default function PaymentFormModal({
 
     const nextUnitId = unitsForContractor.includes(selectedUnitId)
       ? selectedUnitId
-      : unitsForContractor[0] || displayUnits[0]?.unit_id || allUnits[0]?.unit_id || "";
+      : unitsForContractor[0] || allUnitsList[0]?.unit_id || "";
 
     setSelectedUnitId(nextUnitId);
 
@@ -468,14 +385,14 @@ export default function PaymentFormModal({
                             </option>
                           );
                         })
+                    ) : rawActivities.length > 0 ? (
+                      Array.from(new Set(rawActivities.filter((a) => a.contractor_name).map((a) => a.contractor_name))).map((cName) => (
+                        <option key={cName} value={cName}>
+                          🏢 {cName}
+                        </option>
+                      ))
                     ) : (
-                      rawActivities
-                        .filter((a) => a.contractor_name && a.contractor_name !== "Unassigned")
-                        .map((a) => (
-                          <option key={a.id} value={a.contractor_name}>
-                            🏢 {a.contractor_name}
-                          </option>
-                        ))
+                      <option value="Apex Civil Structures — Amit Patel">🏢 Apex Civil Structures — Amit Patel</option>
                     )}
                   </select>
                 ) : (
