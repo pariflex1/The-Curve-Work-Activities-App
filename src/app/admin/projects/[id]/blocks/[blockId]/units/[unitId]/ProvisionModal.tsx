@@ -21,6 +21,12 @@ interface OtherUnit {
   activityCount: number;
 }
 
+export interface ProjectContractorOption {
+  id: string;
+  company_name: string;
+  full_name?: string | null;
+}
+
 interface ProvisionModalProps {
   unitId: string;
   projectId: string;
@@ -28,6 +34,7 @@ interface ProvisionModalProps {
   activeMasters: ActivityMaster[];
   existingMasterIds: string[];
   otherUnits: OtherUnit[];
+  contractors?: ProjectContractorOption[];
   triggerLabel?: string;
 }
 
@@ -38,6 +45,7 @@ export default function ProvisionModal({
   activeMasters,
   existingMasterIds,
   otherUnits,
+  contractors = [],
   triggerLabel = "Provision Activities",
 }: ProvisionModalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +59,9 @@ export default function ProvisionModal({
   const [singleCode, setSingleCode] = useState("");
   const [singleDefaultUnit, setSingleDefaultUnit] = useState("");
   const [singleEstimatedCost, setSingleEstimatedCost] = useState<number>(0);
+  const [singleContractorId, setSingleContractorId] = useState<string>("");
+  const [singleProgressPercentage, setSingleProgressPercentage] = useState<number>(0);
+  const [singleStatus, setSingleStatus] = useState<string>("pending");
   const [singleRemarks, setSingleRemarks] = useState("");
 
   // Batch Mode State
@@ -137,6 +148,9 @@ export default function ProvisionModal({
         customCategory: singleCategory,
         customDefaultUnit: singleDefaultUnit,
         estimatedCost: singleEstimatedCost,
+        contractorId: singleContractorId || null,
+        progressPercentage: singleProgressPercentage,
+        status: singleStatus,
         remarks: singleRemarks,
       });
     } else if (mode === "batch") {
@@ -166,6 +180,9 @@ export default function ProvisionModal({
       setSingleActivityId(undefined);
       setIsSingleCustom(false);
       setSingleEstimatedCost(0);
+      setSingleContractorId("");
+      setSingleProgressPercentage(0);
+      setSingleStatus("pending");
       setSingleRemarks("");
       setSelectedIds([]);
       setSourceUnitId("");
@@ -197,9 +214,9 @@ export default function ProvisionModal({
                 <Sparkles className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Provision Unit Activities</h3>
+                <h3 className="text-lg font-bold text-slate-900">Add Work Progress Activity to Unit</h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Select from searchable standard catalog, create custom tasks, or clone checklist
+                  Assign work activities, set estimated costs, assign contractor, and record progress
                 </p>
               </div>
             </div>
@@ -324,18 +341,81 @@ export default function ProvisionModal({
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Unit-Specific Notes
+                        Assigned Contractor
                       </label>
-                      <input
-                        type="text"
-                        value={singleRemarks}
-                        onChange={(e) => setSingleRemarks(e.target.value)}
-                        placeholder="e.g. East wall only"
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
-                      />
+                      <select
+                        value={singleContractorId}
+                        onChange={(e) => setSingleContractorId(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      >
+                        <option value="">-- Unassigned --</option>
+                        {contractors.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            🏢 {c.company_name} {c.full_name ? `(${c.full_name})` : ""}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                        <span>Initial Progress %</span>
+                        <span className="font-mono text-blue-600 font-bold">{singleProgressPercentage}%</span>
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="5"
+                        value={singleProgressPercentage}
+                        onChange={(e) => {
+                          const p = parseInt(e.target.value, 10);
+                          setSingleProgressPercentage(p);
+                          if (p >= 100) setSingleStatus("completed");
+                          else if (p > 0) setSingleStatus("in_progress");
+                          else setSingleStatus("pending");
+                        }}
+                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600 mt-2"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Work Status
+                      </label>
+                      <select
+                        value={singleStatus}
+                        onChange={(e) => {
+                          const s = e.target.value;
+                          setSingleStatus(s);
+                          if (s === "completed" && singleProgressPercentage < 100) setSingleProgressPercentage(100);
+                          else if (s === "pending") setSingleProgressPercentage(0);
+                        }}
+                        className="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-semibold capitalize focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Unit-Specific Notes / Remarks
+                    </label>
+                    <input
+                      type="text"
+                      value={singleRemarks}
+                      onChange={(e) => setSingleRemarks(e.target.value)}
+                      placeholder="e.g. East wall finishing, Phase 1"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
+                    />
+                  </div>
                 </div>
+
               ) : mode === "batch" ? (
                 // Mode 2: Batch Select with live search
                 <div>

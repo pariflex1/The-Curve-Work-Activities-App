@@ -152,7 +152,10 @@ export default async function UnitActivitiesPage({ params }: UnitActivityPagePro
                 block_name: u.blocks?.name,
                 activityCount: u.unit_activities?.[0]?.count || 0,
               }))}
+              contractors={projectContractors || []}
+              triggerLabel="+ Add Work Activity"
             />
+
           </div>
         </div>
 

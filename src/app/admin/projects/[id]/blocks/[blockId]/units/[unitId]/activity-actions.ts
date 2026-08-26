@@ -135,6 +135,9 @@ export async function provisionSingleActivity(
     customDefaultUnit?: string;
     estimatedCost?: number;
     remarks?: string;
+    contractorId?: string | null;
+    progressPercentage?: number;
+    status?: string;
   } = {}
 ) {
   const authCheck = await verifyProjectAccess(projectId);
@@ -194,20 +197,24 @@ export async function provisionSingleActivity(
     return { error: "This activity is already provisioned for this unit." };
   }
 
+  let progress = payload.progressPercentage || 0;
+  let status = payload.status || (progress >= 100 ? "completed" : progress > 0 ? "in_progress" : "pending");
+
   // Insert into unit_activities
   const { data, error } = await db
     .from("unit_activities")
     .insert({
       unit_id: unitId,
       activity_master_id: masterId,
-      contractor_id: null,
+      contractor_id: payload.contractorId || null,
       estimated_cost: payload.estimatedCost || 0,
       remarks: payload.remarks || null,
-      progress_percentage: 0,
-      status: "pending",
+      progress_percentage: progress,
+      status: status,
       sort_order: 10,
     })
     .select();
+
 
   if (error) return { error: error.message };
 
