@@ -16,6 +16,7 @@ import {
 import UserManualModal from "@/components/UserManualModal";
 import UserManagementModal from "./users/UserManagementModal";
 import PWAInstallButton from "@/components/PWAInstallButton";
+import WorkAndPaymentHub from "@/components/WorkAndPaymentHub";
 
 export const dynamic = "force-dynamic";
 
@@ -27,20 +28,52 @@ export default async function AdminDashboard() {
 
   if (!user) redirect("/login");
 
-  // Fetch profile and metrics concurrently
+  // Fetch profile, metrics, and full hierarchy concurrently
   const [
     { data: profile },
     { count: projectCount },
     { count: blockCount },
     { count: unitCount },
     { data: allProfiles, count: userCount },
+    { data: fullProjects },
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
     supabase.from("projects").select("*", { count: "exact", head: true }),
     supabase.from("blocks").select("*", { count: "exact", head: true }),
     supabase.from("units").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact" }).order("created_at", { ascending: false }),
+    supabase
+      .from("projects")
+      .select(`
+        id,
+        name,
+        status,
+        blocks (
+          id,
+          name,
+          units (
+            id,
+            unit_number,
+            floor,
+            status,
+            unit_activities (
+              id,
+              estimated_cost,
+              progress_percentage,
+              status,
+              notes,
+              activity_master ( name, category ),
+              project_contractors (
+                company_name,
+                profiles ( full_name )
+              )
+            )
+          )
+        )
+      `)
+      .order("created_at", { ascending: false }),
   ]);
+
 
 
   return (
@@ -148,8 +181,12 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
+        {/* Interactive Work Activities & Payment Hub */}
+        <WorkAndPaymentHub projects={fullProjects || []} />
+
         {/* Management Modules */}
         <div className="space-y-6">
+
           <h2 className="text-2xl sm:text-3xl font-bold text-black tracking-tight">
             Management Modules
           </h2>
