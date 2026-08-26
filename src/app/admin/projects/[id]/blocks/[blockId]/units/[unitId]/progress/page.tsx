@@ -84,43 +84,43 @@ export default async function UnitProgressPage({ params }: ProgressPageProps) {
   const blockName = unit.blocks?.name || "Block";
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Breadcrumb Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-          <div className="flex items-center gap-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
             <Link
               href={`/admin/projects/${projectId}/blocks/${blockId}/units/${unitId}`}
-              className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-400 hover:text-white"
+              className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 transition-colors text-slate-600 hover:text-slate-900 shrink-0 min-h-[40px] flex items-center justify-center"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <Link href="/admin/projects" className="hover:text-white transition-colors">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-medium flex-wrap">
+                <Link href="/admin/projects" className="hover:text-blue-600 transition-colors">
                   {projectName}
                 </Link>
-                <span className="text-slate-600">/</span>
+                <span className="text-slate-300">/</span>
                 <Link
                   href={`/admin/projects/${projectId}`}
-                  className="hover:text-white transition-colors"
+                  className="hover:text-blue-600 transition-colors"
                 >
                   {blockName}
                 </Link>
-                <span className="text-slate-600">/</span>
-                <span className="text-white font-medium">Unit {unit.unit_number}</span>
+                <span className="text-slate-300">/</span>
+                <span className="text-slate-900 font-bold">Unit {unit.unit_number}</span>
               </div>
-              <h1 className="text-3xl font-bold text-white flex items-center gap-3 mt-1">
-                <Home className="w-7 h-7 text-amber-400" />
+              <h1 className="text-lg sm:text-2xl font-bold text-slate-900 flex items-center gap-2 mt-1">
+                <Home className="w-6 h-6 text-amber-600 shrink-0" />
                 <span>Unit Work Progress &amp; Financial Dashboard</span>
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 self-start sm:self-auto">
             <Link
               href={`/admin/projects/${projectId}/blocks/${blockId}/units/${unitId}`}
-              className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 text-sm font-medium transition-all"
+              className="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors min-h-[40px] flex items-center"
             >
               Edit Checklist
             </Link>

@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Shield, Clock } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Clock } from "lucide-react";
 import AuditLogViewer from "./AuditLogViewer";
 
 export const dynamic = "force-dynamic";
@@ -28,24 +28,24 @@ export default async function AuditLogsPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex items-center gap-4 border-b border-white/10 pb-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex items-center gap-3.5">
           <Link
             href="/admin"
-            className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-400 hover:text-white"
+            className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 transition-colors text-slate-600 hover:text-slate-900 shrink-0 min-h-[40px] flex items-center justify-center"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <div className="flex items-center gap-2.5">
-              <Shield className="w-7 h-7 text-purple-400" />
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-6 h-6 text-purple-600 shrink-0" />
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                 System Audit Trail &amp; Logs
               </h1>
             </div>
-            <p className="text-slate-400 text-sm mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
               Append-only security log tracking contractor reassignments, payment deletions, and lifecycle events
             </p>
           </div>

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, X, FileSpreadsheet, Trash2 } from "lucide-react";
 import { createActivityMaster, updateActivityMaster, deleteActivityMaster } from "./actions";
+import ActivitySearchSelect, { PRESET_CONSTRUCTION_ACTIVITIES } from "@/components/ActivitySearchSelect";
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
 interface ActivityMasterModalProps {
   activity?: {
@@ -25,12 +27,57 @@ export default function ActivityMasterModal({
   isEdit = false,
 }: ActivityMasterModalProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [name, setName] = useState(activity?.name || "");
+  const [code, setCode] = useState(activity?.code || "");
+  const [category, setCategory] = useState(activity?.category || "");
+  const [defaultUnit, setDefaultUnit] = useState(activity?.default_unit || "");
+  const [description, setDescription] = useState(activity?.description || "");
+  const [sortOrder, setSortOrder] = useState<number>(activity?.sort_order ?? 0);
+  const [isActive, setIsActive] = useState(activity ? (activity.is_active ? "true" : "false") : "true");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Sync state when editing or reopening
+  useEffect(() => {
+    if (activity) {
+      setName(activity.name || "");
+      setCode(activity.code || "");
+      setCategory(activity.category || "");
+      setDefaultUnit(activity.default_unit || "");
+      setDescription(activity.description || "");
+      setSortOrder(activity.sort_order ?? 0);
+      setIsActive(activity.is_active ? "true" : "false");
+    } else {
+      setName("");
+      setCode("");
+      setCategory("");
+      setDefaultUnit("");
+      setDescription("");
+      setSortOrder(0);
+      setIsActive("true");
+    }
+  }, [activity, isOpen]);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError(null);
+
+    // Explicitly set controlled state values
+    formData.set("name", name);
+    formData.set("code", code);
+    formData.set("category", category);
+    formData.set("default_unit", defaultUnit);
+    formData.set("description", description);
+    formData.set("sort_order", sortOrder.toString());
+    formData.set("is_active", isActive);
+
+    if (!name.trim()) {
+      setError("Activity name is required.");
+      setLoading(false);
+      return;
+    }
 
     let res;
     if (isEdit && activity) {
@@ -48,18 +95,33 @@ export default function ActivityMasterModal({
     }
   }
 
-  async function handleDelete() {
-    if (!activity || !confirm(`Are you sure you want to delete activity "${activity.name}"?`)) {
-      return;
-    }
-    setLoading(true);
+  async function handleConfirmDelete() {
+    if (!activity) return { error: "No activity selected" };
     const res = await deleteActivityMaster(activity.id);
     if (res?.error) {
-      setError(res.error);
-      setLoading(false);
-    } else {
-      setLoading(false);
-      setIsOpen(false);
+      return { error: res.error };
+    }
+    setIsOpen(false);
+    return { success: true };
+  }
+
+  function handleActivitySelect(selected: {
+    name: string;
+    isCustom: boolean;
+    category?: string;
+    code?: string;
+    default_unit?: string;
+  }) {
+    setName(selected.name);
+    // Autofill suggested fields if empty or standard option selected
+    if (!isEdit || !category) {
+      if (selected.category) setCategory(selected.category);
+    }
+    if (!isEdit || !code) {
+      if (selected.code) setCode(selected.code);
+    }
+    if (!isEdit || !defaultUnit) {
+      if (selected.default_unit) setDefaultUnit(selected.default_unit);
     }
   }
 
@@ -68,14 +130,14 @@ export default function ActivityMasterModal({
       {isEdit ? (
         <button
           onClick={() => setIsOpen(true)}
-          className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 text-xs font-medium transition-all"
+          className="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors min-h-[36px]"
         >
           Edit
         </button>
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold flex items-center gap-1.5 text-sm shadow-md shadow-cyan-500/20 transition-all cursor-pointer"
+          className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold flex items-center justify-center gap-1.5 text-xs sm:text-sm shadow-sm transition-all min-h-[44px]"
         >
           <Plus className="w-4 h-4" />
           <span>{triggerLabel}</span>
@@ -83,159 +145,165 @@ export default function ActivityMasterModal({
       )}
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-white/15 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400">
-                <FileSpreadsheet className="w-5 h-5" />
+              <div className="w-11 h-11 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                <FileSpreadsheet className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">
+                <h3 className="text-lg font-bold text-slate-900">
                   {isEdit ? "Edit Activity Template" : "Add Activity Template"}
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {isEdit ? "Update standard activity definition" : "Define a standard construction task"}
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Select from standard catalog or define a custom construction activity
                 </p>
               </div>
             </div>
 
             {error && (
-              <div className="mb-5 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
                 {error}
               </div>
             )}
 
             <form action={handleSubmit} className="space-y-4">
+              {/* Searchable Activity Dropdown with 'Other' option */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                   Activity Name *
                 </label>
-                <input
-                  name="name"
-                  type="text"
-                  required
-                  defaultValue={activity?.name || ""}
-                  placeholder="e.g. Waterproofing, False Ceiling"
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm"
+                <ActivitySearchSelect
+                  options={PRESET_CONSTRUCTION_ACTIVITIES}
+                  value={name}
+                  onChange={handleActivitySelect}
+                  placeholder="Select standard activity or type to search..."
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                     Short Code
                   </label>
                   <input
                     name="code"
                     type="text"
-                    defaultValue={activity?.code || ""}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.toUpperCase())}
                     placeholder="e.g. WPF, FCL"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm font-mono uppercase"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm font-mono uppercase"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                     Category
                   </label>
                   <input
                     name="category"
                     type="text"
-                    defaultValue={activity?.category || ""}
-                    placeholder="e.g. Structural, Finishing, MEP"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="e.g. Structural, Finishing"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Default Unit
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Default Unit of Measurement
                   </label>
                   <input
                     name="default_unit"
                     type="text"
-                    defaultValue={activity?.default_unit || ""}
-                    placeholder="sq.ft / r.ft / nos"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm"
+                    value={defaultUnit}
+                    onChange={(e) => setDefaultUnit(e.target.value)}
+                    placeholder="sq.ft / r.ft / nos / cu.m"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                     Sort Order
                   </label>
                   <input
                     name="sort_order"
                     type="number"
-                    defaultValue={activity?.sort_order ?? 0}
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(parseInt(e.target.value, 10) || 0)}
                     placeholder="0"
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Description / Specifications
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Description / Quality Specifications
                 </label>
                 <textarea
                   name="description"
                   rows={2}
-                  defaultValue={activity?.description || ""}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   placeholder="Details regarding quality standards, materials, or scope..."
-                  className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                   Status
                 </label>
                 <select
                   name="is_active"
-                  defaultValue={activity ? (activity.is_active ? "true" : "false") : "true"}
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm"
+                  value={isActive}
+                  onChange={(e) => setIsActive(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
                 >
                   <option value="true">Active (Included in template checklists)</option>
                   <option value="false">Inactive (Hidden from new unit provisioning)</option>
                 </select>
               </div>
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-white/10 mt-6">
+              <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100 mt-6">
                 {isEdit ? (
                   <button
                     type="button"
-                    onClick={handleDelete}
+                    onClick={() => setIsDeleteOpen(true)}
                     disabled={loading}
-                    className="px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-sm font-semibold transition-all"
+                    className="px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 text-xs sm:text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 min-h-[44px]"
                   >
-                    Delete
+                    <Trash2 className="w-4 h-4" />
+                    <span>Delete</span>
                   </button>
                 ) : (
                   <div />
                 )}
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 text-sm font-medium transition-all"
+                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors min-h-[44px]"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white text-sm font-semibold shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-50"
+                    disabled={loading || !name.trim()}
+                    className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all disabled:opacity-50 min-h-[44px]"
                   >
                     {loading ? "Saving..." : isEdit ? "Save Changes" : "Create Activity"}
                   </button>
@@ -244,6 +312,17 @@ export default function ActivityMasterModal({
             </form>
           </div>
         </div>
+      )}
+
+      {isEdit && activity && (
+        <DeleteConfirmationModal
+          isOpen={isDeleteOpen}
+          onClose={() => setIsDeleteOpen(false)}
+          onConfirm={handleConfirmDelete}
+          itemName={activity.name}
+          itemType="activity template"
+          warningText="Deleting this standard activity template from the catalog will not remove existing unit activities that were already created from it, but will prevent it from appearing in future checklists."
+        />
       )}
     </>
   );

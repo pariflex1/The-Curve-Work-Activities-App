@@ -8,15 +8,18 @@ import {
   Users,
   MapPin,
   Plus,
-  Trash2,
   UserCheck,
   Briefcase,
   Crown,
   ChevronRight,
+  Coins,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 import ProjectFormModal from "../ProjectFormModal";
 import BlockFormModal from "./BlockFormModal";
 import TeamAssignmentModal from "./TeamAssignmentModal";
+import PaymentFormModal from "@/app/admin/payments/PaymentFormModal";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +34,27 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   // Fetch project details
   const { data: project } = await supabase
     .from("projects")
-    .select("*")
+    .select(`
+      *,
+      blocks (
+        id,
+        name,
+        sort_order,
+        units (
+          id,
+          unit_number,
+          floor,
+          unit_type,
+          status,
+          unit_activities (
+            id,
+            estimated_cost,
+            progress_percentage,
+            status
+          )
+        )
+      )
+    `)
     .eq("id", id)
     .single();
 
@@ -39,126 +62,158 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     notFound();
   }
 
-  // Fetch blocks with unit counts
-  const { data: blocks } = await supabase
-    .from("blocks")
-    .select(`
-      *,
-      units (
-        id,
-        unit_number,
-        floor,
-        unit_type,
-        status
-      )
-    `)
-    .eq("project_id", id)
-    .order("sort_order", { ascending: true });
+  const blocks = project.blocks || [];
 
-  // Fetch team assignments with profile names
-  const { data: employees } = await supabase
-    .from("project_employees")
-    .select("id, profile_id, profiles ( id, full_name, phone )")
-    .eq("project_id", id);
+  // Fetch team assignments, profiles, and payments concurrently
+  const [
+    { data: employees },
+    { data: contractors },
+    { data: owners },
+    { data: allProfiles },
+    { data: payments },
+  ] = await Promise.all([
+    supabase
+      .from("project_employees")
+      .select("id, profile_id, profiles ( id, full_name, phone )")
+      .eq("project_id", id),
+    supabase
+      .from("project_contractors")
+      .select("id, profile_id, company_name, profiles ( id, full_name, phone )")
+      .eq("project_id", id),
+    supabase
+      .from("project_owners")
+      .select("id, profile_id, profiles ( id, full_name, phone )")
+      .eq("project_id", id),
+    supabase
+      .from("profiles")
+      .select("id, full_name, role, phone")
+      .eq("is_active", true),
+    supabase
+      .from("payments")
+      .select("*")
+      .eq("project_id", id)
+      .order("payment_date", { ascending: false }),
+  ]);
 
-  const { data: contractors } = await supabase
-    .from("project_contractors")
-    .select("id, profile_id, company_name, profiles ( id, full_name, phone )")
-    .eq("project_id", id);
 
-  const { data: owners } = await supabase
-    .from("project_owners")
-    .select("id, profile_id, profiles ( id, full_name, phone )")
-    .eq("project_id", id);
+  const totalUnits = blocks.reduce((acc: number, b: any) => acc + (b.units?.length || 0), 0);
 
-  // Fetch available profiles for team assignment dropdown
-  const { data: allProfiles } = await supabase
-    .from("profiles")
-    .select("id, full_name, role, phone")
-    .eq("is_active", true);
+  let totalEstimatedCost = 0;
+  blocks.forEach((b: any) => {
+    b.units?.forEach((u: any) => {
+      u.unit_activities?.forEach((a: any) => {
+        totalEstimatedCost += Number(a.estimated_cost) || 0;
+      });
+    });
+  });
 
-  const totalUnits = blocks?.reduce((acc, b) => acc + (b.units?.length || 0), 0) || 0;
+  const totalPaid = payments?.reduce((acc, p) => acc + (Number(p.amount) || 0), 0) || 0;
+  const balanceDue = totalEstimatedCost - totalPaid;
+
+  const statusBadge =
+    project.status === "active"
+      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+      : project.status === "on_hold"
+      ? "bg-amber-50 text-amber-700 border-amber-200"
+      : project.status === "completed"
+      ? "bg-blue-50 text-blue-700 border-blue-200"
+      : "bg-slate-100 text-slate-700 border-slate-200";
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-          <div className="flex items-center gap-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
             <Link
               href="/admin/projects"
-              className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-400 hover:text-white"
+              className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 transition-colors text-slate-600 hover:text-slate-900 shrink-0 min-h-[40px] flex items-center justify-center"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-white">{project.name}</h1>
-                <span className="text-xs px-2.5 py-1 rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/30 capitalize font-medium">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                  {project.name}
+                </h1>
+                <span
+                  className={`text-xs px-2.5 py-0.5 rounded-full border capitalize font-semibold ${statusBadge}`}
+                >
                   {project.status.replace("_", " ")}
                 </span>
               </div>
               {project.location && (
-                <p className="text-slate-400 text-sm flex items-center gap-1.5 mt-1">
-                  <MapPin className="w-4 h-4 text-slate-500" />
+                <p className="text-xs sm:text-sm text-slate-500 flex items-center gap-1.5 mt-1 font-normal">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <span>{project.location}</span>
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            <PaymentFormModal
+              projectId={id}
+              triggerLabel="Make Payment"
+            />
             <ProjectFormModal project={project} isEdit={true} />
           </div>
         </div>
 
-        {/* Overview Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-lg">
-            <p className="text-xs uppercase tracking-wider font-semibold text-slate-400">Total Blocks</p>
-            <p className="text-2xl font-bold text-white mt-1">{blocks?.length || 0}</p>
+        {/* Overview & Financial KPIs */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p className="text-xs uppercase tracking-wider font-semibold text-slate-500">Blocks / Units</p>
+            <p className="text-2xl sm:text-3xl font-bold text-black mt-1">{blocks.length} / {totalUnits}</p>
+            <p className="text-xs text-slate-500 mt-1">Total inventory</p>
           </div>
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-lg">
-            <p className="text-xs uppercase tracking-wider font-semibold text-slate-400">Total Units</p>
-            <p className="text-2xl font-bold text-white mt-1">{totalUnits}</p>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p className="text-xs uppercase tracking-wider font-semibold text-blue-700">Project Est. Cost</p>
+            <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-1">₹{totalEstimatedCost.toLocaleString("en-IN")}</p>
+            <p className="text-xs text-slate-500 mt-1">All unit activities</p>
           </div>
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-lg">
-            <p className="text-xs uppercase tracking-wider font-semibold text-slate-400">Employees</p>
-            <p className="text-2xl font-bold text-emerald-400 mt-1">{employees?.length || 0}</p>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p className="text-xs uppercase tracking-wider font-semibold text-emerald-700">Total Disbursed (Paid)</p>
+            <p className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-1">₹{totalPaid.toLocaleString("en-IN")}</p>
+            <p className="text-xs text-slate-500 mt-1">{payments?.length || 0} payments recorded</p>
           </div>
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-lg">
-            <p className="text-xs uppercase tracking-wider font-semibold text-slate-400">Contractors</p>
-            <p className="text-2xl font-bold text-cyan-400 mt-1">{contractors?.length || 0}</p>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <p className="text-xs uppercase tracking-wider font-semibold text-purple-700">Outstanding Balance</p>
+            <p className="text-2xl sm:text-3xl font-bold text-purple-700 mt-1">₹{balanceDue.toLocaleString("en-IN")}</p>
+            <p className="text-xs text-slate-500 mt-1">Estimated − Paid</p>
           </div>
         </div>
 
-        {/* 2-Column Section: Blocks & Hierarchy | Team Allocation */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* 2-Column Section: Blocks & Hierarchy | Team Allocation & Payments */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Blocks Section (2 cols) */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Layers className="w-5 h-5 text-emerald-400" />
-                <h2 className="text-xl font-bold text-white">Blocks & Towers</h2>
+              <div className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-black" />
+                <h2 className="text-lg font-bold text-slate-900">Blocks &amp; Towers</h2>
               </div>
               <BlockFormModal projectId={id} />
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               {blocks && blocks.length > 0 ? (
-                blocks.map((block) => (
+                blocks.map((block: any) => (
                   <div
                     key={block.id}
-                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-all shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-black transition-all shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold text-white">{block.name}</h3>
-                        <span className="text-xs px-2 py-0.5 rounded-md bg-white/5 text-slate-400 border border-white/10">
+                        <h3 className="text-base font-bold text-slate-900">{block.name}</h3>
+                        <span className="text-xs px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 font-medium">
                           Order #{block.sort_order}
                         </span>
                       </div>
-                      <p className="text-sm text-slate-400 mt-1">
+                      <p className="text-xs sm:text-sm text-slate-500 mt-1">
                         {block.units?.length || 0} unit(s) registered in this block
                       </p>
                     </div>
@@ -167,7 +222,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                       <BlockFormModal projectId={id} block={block} isEdit={true} />
                       <Link
                         href={`/admin/projects/${id}/blocks/${block.id}`}
-                        className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 text-sm font-medium flex items-center gap-1.5 transition-all"
+                        className="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 text-black hover:bg-black hover:text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all min-h-[40px]"
                       >
                         <span>Manage Units</span>
                         <ChevronRight className="w-4 h-4" />
@@ -176,9 +231,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   </div>
                 ))
               ) : (
-                <div className="py-12 text-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-6">
-                  <Layers className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-                  <p className="text-slate-300 font-medium">No Blocks Created Yet</p>
+                <div className="py-12 text-center bg-white rounded-2xl border border-dashed border-slate-200 shadow-sm p-6">
+                  <Layers className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+                  <p className="text-slate-800 font-bold text-sm">No Blocks Created Yet</p>
                   <p className="text-slate-500 text-xs mt-1 mb-4">
                     Add structural blocks (e.g. Tower A, Block 1) to start adding units.
                   </p>
@@ -186,14 +241,66 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </div>
               )}
             </div>
+
+            {/* Recent Project Payments Table for Admin */}
+            {payments && payments.length > 0 && (
+              <div className="mt-8 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Coins className="w-5 h-5 text-emerald-600" />
+                    <h3 className="text-base font-bold text-black">Project Disbursements Ledger</h3>
+                  </div>
+                  <PaymentFormModal
+                    projectId={id}
+                    triggerLabel="+ Record Payment"
+                  />
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm text-slate-700">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                      <tr>
+                        <th className="px-5 py-3">Date</th>
+                        <th className="px-5 py-3">Paid To</th>
+                        <th className="px-5 py-3">Mode</th>
+                        <th className="px-5 py-3">Amount</th>
+                        <th className="px-5 py-3 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 font-sans">
+                      {payments.slice(0, 5).map((p) => (
+                        <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-5 py-3 font-mono text-xs text-slate-500">{p.payment_date}</td>
+                          <td className="px-5 py-3 font-semibold text-slate-900">{p.paid_to}</td>
+                          <td className="px-5 py-3">
+                            <span className="px-2 py-0.5 rounded-full text-[11px] bg-slate-100 border border-slate-200 font-medium">
+                              {p.payment_type || "Transfer"}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3 font-bold text-emerald-600 font-mono">
+                            ₹{Number(p.amount).toLocaleString("en-IN")}
+                          </td>
+                          <td className="px-5 py-3 text-right">
+                            <PaymentFormModal
+                              projectId={id}
+                              payment={p}
+                              isEdit={true}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Team Allocations Section (1 col) */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Users className="w-5 h-5 text-cyan-400" />
-                <h2 className="text-xl font-bold text-white">Project Team</h2>
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-black" />
+                <h2 className="text-lg font-bold text-slate-900">Project Team</h2>
               </div>
               <TeamAssignmentModal
                 projectId={id}
@@ -205,79 +312,79 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </div>
 
             {/* Team Members Card */}
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-xl space-y-6">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-5">
               {/* Employees */}
               <div>
-                <p className="text-xs uppercase tracking-wider font-semibold text-emerald-400 mb-3 flex items-center gap-1.5">
-                  <UserCheck className="w-3.5 h-3.5" />
+                <p className="text-xs uppercase tracking-wider font-semibold text-emerald-700 mb-2.5 flex items-center gap-1.5">
+                  <UserCheck className="w-4 h-4" />
                   <span>Assigned Employees ({employees?.length || 0})</span>
                 </p>
                 {employees && employees.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {employees.map((emp: any) => (
                       <div
                         key={emp.id}
-                        className="flex items-center justify-between p-2.5 bg-white/5 rounded-xl border border-white/5 text-sm"
+                        className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs sm:text-sm"
                       >
                         <div>
-                          <p className="font-medium text-white">{emp.profiles?.full_name}</p>
-                          <p className="text-xs text-slate-400">{emp.profiles?.phone || "No phone"}</p>
+                          <p className="font-semibold text-slate-900">{emp.profiles?.full_name}</p>
+                          <p className="text-xs text-slate-500">{emp.profiles?.phone || "No phone"}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500 italic">No employees assigned</p>
+                  <p className="text-xs text-slate-400 italic">No employees assigned</p>
                 )}
               </div>
 
               {/* Contractors */}
-              <div className="border-t border-white/10 pt-4">
-                <p className="text-xs uppercase tracking-wider font-semibold text-amber-400 mb-3 flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5" />
+              <div className="border-t border-slate-100 pt-4">
+                <p className="text-xs uppercase tracking-wider font-semibold text-amber-700 mb-2.5 flex items-center gap-1.5">
+                  <Briefcase className="w-4 h-4" />
                   <span>Linked Contractors ({contractors?.length || 0})</span>
                 </p>
                 {contractors && contractors.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {contractors.map((con: any) => (
                       <div
                         key={con.id}
-                        className="flex items-center justify-between p-2.5 bg-white/5 rounded-xl border border-white/5 text-sm"
+                        className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs sm:text-sm"
                       >
                         <div>
-                          <p className="font-medium text-white">{con.company_name}</p>
-                          <p className="text-xs text-slate-400">{con.profiles?.full_name}</p>
+                          <p className="font-semibold text-slate-900">{con.company_name}</p>
+                          <p className="text-xs text-slate-500">{con.profiles?.full_name}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500 italic">No contractors linked</p>
+                  <p className="text-xs text-slate-400 italic">No contractors linked</p>
                 )}
               </div>
 
               {/* Owners */}
-              <div className="border-t border-white/10 pt-4">
-                <p className="text-xs uppercase tracking-wider font-semibold text-cyan-400 mb-3 flex items-center gap-1.5">
-                  <Crown className="w-3.5 h-3.5" />
+              <div className="border-t border-slate-100 pt-4">
+                <p className="text-xs uppercase tracking-wider font-semibold text-purple-700 mb-2.5 flex items-center gap-1.5">
+                  <Crown className="w-4 h-4" />
                   <span>Project Owners ({owners?.length || 0})</span>
                 </p>
                 {owners && owners.length > 0 ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {owners.map((own: any) => (
                       <div
                         key={own.id}
-                        className="flex items-center justify-between p-2.5 bg-white/5 rounded-xl border border-white/5 text-sm"
+                        className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs sm:text-sm"
                       >
                         <div>
-                          <p className="font-medium text-white">{own.profiles?.full_name}</p>
-                          <p className="text-xs text-slate-400">{own.profiles?.phone || "No phone"}</p>
+                          <p className="font-semibold text-slate-900">{own.profiles?.full_name}</p>
+                          <p className="text-xs text-slate-500">{own.profiles?.phone || "No phone"}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500 italic">No owners assigned</p>
+                  <p className="text-xs text-slate-400 italic">No owners assigned</p>
                 )}
               </div>
             </div>

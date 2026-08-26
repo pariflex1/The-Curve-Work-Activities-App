@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 export async function assignContractorToActivity(
@@ -15,16 +16,37 @@ export async function assignContractorToActivity(
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { error: "Unauthorized" };
+  if (!user) return { error: "Unauthorized. Please log in." };
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id, role")
     .eq("user_id", user.id)
     .single();
 
+  if (!profile) return { error: "Profile not found." };
+
+  // Check role & assignment
+  if (profile.role !== "admin") {
+    if (profile.role !== "employee") {
+      return { error: "Unauthorized: only Admins and Site Engineers can assign contractors." };
+    }
+    const { data: assignment } = await supabase
+      .from("project_employees")
+      .select("id")
+      .eq("project_id", projectId)
+      .eq("profile_id", profile.id)
+      .maybeSingle();
+
+    if (!assignment) {
+      return { error: "Access denied. You are not assigned to this project." };
+    }
+  }
+
+  const adminClient = createAdminClient();
+
   // Fetch current activity to get old contractor ID
-  const { data: currentActivity, error: fetchErr } = await supabase
+  const { data: currentActivity, error: fetchErr } = await adminClient
     .from("unit_activities")
     .select("contractor_id, activity_master ( name )")
     .eq("id", unitActivityId)
@@ -35,7 +57,7 @@ export async function assignContractorToActivity(
   const oldContractorId = currentActivity?.contractor_id;
 
   // Update contractor_id on unit_activity
-  const { error: updateErr } = await supabase
+  const { error: updateErr } = await adminClient
     .from("unit_activities")
     .update({
       contractor_id: newContractorId || null,
@@ -46,7 +68,7 @@ export async function assignContractorToActivity(
   if (updateErr) return { error: updateErr.message };
 
   // Write audit log entry
-  await supabase.from("audit_logs").insert({
+  await adminClient.from("audit_logs").insert({
     actor_profile_id: profile?.id,
     action: oldContractorId ? "REASSIGN_CONTRACTOR" : "ASSIGN_CONTRACTOR",
     entity_type: "unit_activities",

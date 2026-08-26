@@ -2,7 +2,9 @@ import { createClient } from "@/utils/supabase/server";
 import { signOut } from "@/app/auth/actions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Building2, MapPin, Layers, Briefcase, ChevronRight, UserCheck } from "lucide-react";
+import { Building2, MapPin, Layers, Briefcase, ChevronRight, UserCheck, LogOut } from "lucide-react";
+import UserManualModal from "@/components/UserManualModal";
+import PWAInstallButton from "@/components/PWAInstallButton";
 
 export const dynamic = "force-dynamic";
 
@@ -34,44 +36,55 @@ export default async function EmployeeDashboard() {
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400">
-                <UserCheck className="w-6 h-6" />
-              </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
+              <UserCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                 Employee Workspace
               </h1>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                Welcome, <strong className="text-slate-800">{profile?.full_name || "Employee"}</strong> — Assigned Projects &amp; Field Operations
+              </p>
             </div>
-            <p className="text-slate-400 text-sm mt-1">
-              Welcome, <span className="text-white font-medium">{profile?.full_name}</span> — Assigned Projects &amp; Field Operations
-            </p>
           </div>
 
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            <PWAInstallButton />
+            <UserManualModal role="employee" triggerLabel="Engineer Manual" />
+            <Link
+              href="/"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors min-h-[40px] flex items-center"
             >
-              Sign Out
-            </button>
-          </form>
+              Home
+            </Link>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs sm:text-sm font-semibold transition-colors min-h-[40px] flex items-center gap-1.5"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </button>
+            </form>
+          </div>
         </div>
 
         {/* Assigned Projects Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-blue-400" />
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-blue-600" />
               <span>My Assigned Projects ({projects?.length || 0})</span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {projects && projects.length > 0 ? (
               projects.map((project) => {
                 const totalBlocks = project.blocks?.length || 0;
@@ -81,41 +94,50 @@ export default async function EmployeeDashboard() {
                     0
                   ) || 0;
 
+                const statusBadge =
+                  project.status === "active"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : "bg-slate-100 text-slate-700 border-slate-200";
+
                 return (
                   <div
                     key={project.id}
-                    className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all shadow-xl flex flex-col justify-between"
+                    className="bg-white border border-slate-200 hover:border-blue-300 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2 mb-3">
-                        <h3 className="text-xl font-semibold text-white">{project.name}</h3>
-                        <span className="text-xs px-2.5 py-1 rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/30 capitalize font-medium">
+                        <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                          {project.name}
+                        </h3>
+                        <span
+                          className={`text-xs px-2.5 py-1 rounded-full border capitalize font-semibold ${statusBadge}`}
+                        >
                           {project.status.replace("_", " ")}
                         </span>
                       </div>
 
                       {project.location && (
-                        <p className="text-slate-400 text-sm flex items-center gap-1.5 mb-5">
-                          <MapPin className="w-4 h-4 text-slate-500 shrink-0" />
-                          <span>{project.location}</span>
+                        <p className="text-slate-500 text-xs sm:text-sm flex items-center gap-1.5 mb-5">
+                          <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span className="truncate">{project.location}</span>
                         </p>
                       )}
 
-                      <div className="grid grid-cols-2 gap-2 p-3 bg-white/5 rounded-xl border border-white/5 mb-6 text-center">
+                      <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100 mb-6 text-center">
                         <div>
-                          <p className="text-xs text-slate-400">Blocks</p>
-                          <p className="text-lg font-bold text-white mt-0.5">{totalBlocks}</p>
+                          <p className="text-xs text-slate-500 font-medium">Blocks</p>
+                          <p className="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">{totalBlocks}</p>
                         </div>
-                        <div className="border-l border-white/5">
-                          <p className="text-xs text-slate-400">Units</p>
-                          <p className="text-lg font-bold text-white mt-0.5">{totalUnits}</p>
+                        <div className="border-l border-slate-200">
+                          <p className="text-xs text-slate-500 font-medium">Units</p>
+                          <p className="text-base sm:text-lg font-extrabold text-slate-900 mt-0.5">{totalUnits}</p>
                         </div>
                       </div>
                     </div>
 
                     <Link
                       href={`/employee/projects/${project.id}`}
-                      className="w-full py-2.5 px-4 rounded-xl bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 text-blue-300 flex items-center justify-center gap-2 font-medium transition-all text-sm"
+                      className="w-full py-2.5 px-4 rounded-xl bg-blue-50 border border-blue-200 hover:bg-blue-600 hover:text-white text-blue-700 flex items-center justify-center gap-2 font-semibold transition-all text-xs sm:text-sm min-h-[44px]"
                     >
                       <Briefcase className="w-4 h-4" />
                       <span>Manage Unit Contractors</span>
@@ -125,10 +147,10 @@ export default async function EmployeeDashboard() {
                 );
               })
             ) : (
-              <div className="col-span-full py-16 text-center bg-white/5 rounded-2xl border border-dashed border-white/10 p-6">
-                <Building2 className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-lg font-semibold text-slate-300">No Projects Assigned</h3>
-                <p className="text-slate-500 text-xs max-w-sm mx-auto mt-1">
+              <div className="col-span-full py-16 text-center bg-white rounded-2xl border border-dashed border-slate-200 p-6 shadow-sm">
+                <Building2 className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                <h3 className="text-base font-bold text-slate-800">No Projects Assigned</h3>
+                <p className="text-slate-500 text-xs sm:text-sm max-w-sm mx-auto mt-1">
                   Contact an administrator to get assigned to active development projects.
                 </p>
               </div>

@@ -2,6 +2,8 @@ import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Building2, Layers, Home, MapPin, ChevronRight, Briefcase } from "lucide-react";
+import UserManualModal from "@/components/UserManualModal";
+import PWAInstallButton from "@/components/PWAInstallButton";
 
 export const dynamic = "force-dynamic";
 
@@ -45,39 +47,53 @@ export default async function EmployeeProjectPage({ params }: EmployeeProjectPag
     .eq("project_id", id)
     .order("sort_order", { ascending: true });
 
+  const statusBadge =
+    project.status === "active"
+      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+      : "bg-slate-100 text-slate-700 border-slate-200";
+
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-          <div className="flex items-center gap-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
             <Link
               href="/employee"
-              className="p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-slate-400 hover:text-white"
+              className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 transition-colors text-slate-600 hover:text-slate-900 shrink-0 min-h-[40px] flex items-center justify-center"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold text-white">{project.name}</h1>
-                <span className="text-xs px-2.5 py-1 rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/30 capitalize font-medium">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                  {project.name}
+                </h1>
+                <span
+                  className={`text-xs px-2.5 py-0.5 rounded-full border capitalize font-semibold ${statusBadge}`}
+                >
                   {project.status.replace("_", " ")}
                 </span>
               </div>
               {project.location && (
-                <p className="text-slate-400 text-sm flex items-center gap-1.5 mt-1">
-                  <MapPin className="w-4 h-4 text-slate-500" />
+                <p className="text-xs sm:text-sm text-slate-500 flex items-center gap-1.5 mt-1">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <span>{project.location}</span>
                 </p>
               )}
             </div>
           </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+            <PWAInstallButton />
+            <UserManualModal role="employee" triggerLabel="Engineer Manual" />
+          </div>
         </div>
 
         {/* Blocks & Units Hierarchy */}
         <div className="space-y-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Layers className="w-5 h-5 text-blue-400" />
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+            <Layers className="w-5 h-5 text-blue-600" />
             <span>Blocks &amp; Unit Workstreams</span>
           </h2>
 
@@ -86,11 +102,11 @@ export default async function EmployeeProjectPage({ params }: EmployeeProjectPag
               blocks.map((block) => (
                 <div
                   key={block.id}
-                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl space-y-4"
+                  className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4"
                 >
-                  <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                    <h3 className="text-lg font-bold text-white">{block.name}</h3>
-                    <span className="text-xs text-slate-400">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900">{block.name}</h3>
+                    <span className="text-xs text-slate-500 font-medium">
                       {block.units?.length || 0} unit(s) in block
                     </span>
                   </div>
@@ -105,25 +121,25 @@ export default async function EmployeeProjectPage({ params }: EmployeeProjectPag
                         return (
                           <div
                             key={unit.id}
-                            className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between"
+                            className="bg-slate-50 rounded-xl p-4 border border-slate-200 hover:border-blue-300 transition-all flex flex-col justify-between"
                           >
                             <div>
                               <div className="flex items-center justify-between mb-2">
-                                <h4 className="font-bold text-white text-base">
+                                <h4 className="font-bold text-slate-900 text-sm sm:text-base">
                                   Unit {unit.unit_number}
                                 </h4>
-                                <span className="text-xs px-2 py-0.5 rounded-md bg-white/5 text-slate-400 border border-white/10">
+                                <span className="text-xs px-2 py-0.5 rounded-md bg-white text-slate-600 border border-slate-200 font-medium">
                                   {unit.unit_type || "Std"}
                                 </span>
                               </div>
-                              <p className="text-xs text-slate-400">
-                                Contractors: {assignedActivities}/{totalActivities} assigned
+                              <p className="text-xs text-slate-500">
+                                Contractors: <strong className="text-slate-800">{assignedActivities}/{totalActivities}</strong> assigned
                               </p>
                             </div>
 
                             <Link
                               href={`/employee/projects/${id}/units/${unit.id}`}
-                              className="mt-4 w-full py-2 px-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-300 hover:bg-blue-500/20 text-xs font-semibold flex items-center justify-center gap-1 transition-all"
+                              className="mt-4 w-full py-2 px-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white text-xs font-semibold flex items-center justify-center gap-1 transition-all min-h-[36px]"
                             >
                               <Briefcase className="w-3.5 h-3.5" />
                               <span>Assign Contractors</span>
@@ -132,7 +148,7 @@ export default async function EmployeeProjectPage({ params }: EmployeeProjectPag
                         );
                       })
                     ) : (
-                      <p className="text-xs text-slate-500 italic col-span-full py-4 text-center">
+                      <p className="text-xs text-slate-400 italic col-span-full py-4 text-center">
                         No units in this block.
                       </p>
                     )}

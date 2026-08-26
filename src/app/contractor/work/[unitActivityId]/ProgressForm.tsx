@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Camera, Image as ImageIcon, X, Upload, CheckCircle2, ArrowUpRight } from "lucide-react";
+import { Camera, Image as ImageIcon, X, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { submitProgressReport } from "./progress-actions";
 
@@ -103,41 +103,41 @@ export default function ProgressForm({
   }
 
   return (
-    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-xl space-y-6">
-      <div className="flex items-center justify-between border-b border-white/10 pb-4">
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
         <div>
-          <h3 className="text-xl font-bold text-white">Record Work Progress</h3>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900">Record Work Progress</h3>
+          <p className="text-xs text-slate-500 mt-0.5">
             Submit daily site completion percentages and visual verification photos
           </p>
         </div>
         <div className="text-right">
-          <span className="text-xs text-slate-400">Current Progress</span>
-          <p className="text-xl font-bold text-amber-400 font-mono">{currentProgress}%</p>
+          <span className="text-xs text-slate-500">Current Progress</span>
+          <p className="text-lg font-bold text-blue-600 font-mono">{currentProgress}%</p>
         </div>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+        <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-medium">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 shrink-0" />
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
           <span>Progress report submitted successfully! Activity status and history updated.</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Progress % Input & Slider */}
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            <label className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
               New Progress Percentage *
             </label>
-            <span className="text-2xl font-bold text-white font-mono">{newProgress}%</span>
+            <span className="text-2xl font-extrabold text-slate-900 font-mono">{newProgress}%</span>
           </div>
 
           <input
@@ -147,10 +147,10 @@ export default function ProgressForm({
             step="5"
             value={newProgress}
             onChange={(e) => setNewProgress(parseInt(e.target.value, 10))}
-            className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+            className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
           />
 
-          <div className="flex justify-between text-xs text-slate-500 font-mono">
+          <div className="flex justify-between text-xs text-slate-400 font-mono">
             <span>0% (Pending)</span>
             <span>50%</span>
             <span>100% (Completed)</span>
@@ -159,7 +159,7 @@ export default function ProgressForm({
 
         {/* Work Completed Note */}
         <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
             Work Completed Note *
           </label>
           <textarea
@@ -168,13 +168,13 @@ export default function ProgressForm({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Describe what specific work was finished (e.g. Completed brick masonry for east-facing wall, cured for 48 hrs)..."
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm"
+            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
           />
         </div>
 
         {/* Optional Remarks */}
         <div>
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
             Remarks / Site Observations (Optional)
           </label>
           <input
@@ -182,20 +182,20 @@ export default function ProgressForm({
             value={remarks}
             onChange={(e) => setRemarks(e.target.value)}
             placeholder="e.g. Material delivery pending for next milestone"
-            className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm"
+            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
           />
         </div>
 
         {/* Photo Upload Section */}
-        <div className="space-y-3">
-          <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+        <div className="space-y-2.5">
+          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
             Site Verification Photos (Camera / Gallery)
           </label>
 
           <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-white/20 bg-white/5 hover:bg-white/10 transition-all cursor-pointer min-h-[70px]">
-              <Camera className="w-6 h-6 text-amber-400 mb-1" />
-              <span className="text-xs text-slate-300 font-medium">Take Photo</span>
+            <label className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition-all cursor-pointer min-h-[70px]">
+              <Camera className="w-6 h-6 text-blue-600 mb-1" />
+              <span className="text-xs text-slate-700 font-semibold">Take Photo</span>
               <input
                 type="file"
                 accept="image/*"
@@ -205,9 +205,9 @@ export default function ProgressForm({
               />
             </label>
 
-            <label className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-white/20 bg-white/5 hover:bg-white/10 transition-all cursor-pointer min-h-[70px]">
-              <ImageIcon className="w-6 h-6 text-cyan-400 mb-1" />
-              <span className="text-xs text-slate-300 font-medium">Choose Gallery</span>
+            <label className="flex flex-col items-center justify-center p-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 transition-all cursor-pointer min-h-[70px]">
+              <ImageIcon className="w-6 h-6 text-indigo-600 mb-1" />
+              <span className="text-xs text-slate-700 font-semibold">Choose Gallery</span>
               <input
                 type="file"
                 accept="image/*"
@@ -222,12 +222,12 @@ export default function ProgressForm({
           {previews.length > 0 && (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-2">
               {previews.map((src, i) => (
-                <div key={i} className="relative rounded-xl overflow-hidden aspect-square border border-white/15 group">
+                <div key={i} className="relative rounded-xl overflow-hidden aspect-square border border-slate-200 group shadow-sm">
                   <img src={src} alt="Preview" className="w-full h-full object-cover" />
                   <button
                     type="button"
                     onClick={() => removePhoto(i)}
-                    className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/70 text-white hover:bg-red-500 transition-colors"
+                    className="absolute top-1.5 right-1.5 p-1 rounded-full bg-slate-900/70 text-white hover:bg-red-600 transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -241,14 +241,14 @@ export default function ProgressForm({
         <button
           type="submit"
           disabled={loading || !note.trim()}
-          className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold flex items-center justify-center gap-2 text-base shadow-lg shadow-amber-500/20 transition-all disabled:opacity-50 min-h-[48px] cursor-pointer"
+          className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center justify-center gap-2 text-sm shadow-sm transition-all disabled:opacity-50 min-h-[44px] cursor-pointer"
         >
           {loading ? (
             <span>{uploadProgressText || "Submitting..."}</span>
           ) : (
             <>
               <span>Submit Progress Update</span>
-              <ArrowUpRight className="w-5 h-5" />
+              <ArrowUpRight className="w-4 h-4" />
             </>
           )}
         </button>

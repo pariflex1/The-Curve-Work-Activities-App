@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Briefcase, CheckCircle2, UserX } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { assignContractorToActivity } from "./contractor-actions";
 
 interface Contractor {
@@ -59,7 +59,7 @@ export default function ContractorSelect({
         value={selectedId}
         onChange={handleChange}
         disabled={loading}
-        className="px-3 py-1.5 rounded-xl bg-slate-800 border border-white/10 text-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 min-w-[180px]"
+        className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white disabled:opacity-50 min-w-[180px] min-h-[36px]"
       >
         <option value="">-- Unassigned --</option>
         {contractors.map((c) => {
@@ -72,14 +72,14 @@ export default function ContractorSelect({
         })}
       </select>
 
-      {loading && <span className="text-xs text-amber-400 animate-pulse">Saving...</span>}
+      {loading && <span className="text-xs text-blue-600 font-semibold animate-pulse">Saving...</span>}
       {saved && (
-        <span className="text-xs text-emerald-400 flex items-center gap-0.5">
+        <span className="text-xs text-emerald-600 font-semibold flex items-center gap-0.5">
           <CheckCircle2 className="w-3.5 h-3.5" />
           <span>Assigned</span>
         </span>
       )}
-      {error && <span className="text-xs text-red-400 truncate max-w-[120px]">{error}</span>}
+      {error && <span className="text-xs text-red-600 truncate max-w-[120px]">{error}</span>}
     </div>
   );
 }

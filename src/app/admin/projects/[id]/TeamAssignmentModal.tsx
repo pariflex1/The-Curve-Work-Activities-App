@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, X, UserPlus, Trash2, CheckCircle2, Building2 } from "lucide-react";
+import { Users, X, UserPlus, Trash2 } from "lucide-react";
 import {
   assignEmployee,
   removeEmployee,
@@ -10,6 +10,8 @@ import {
   assignOwner,
   removeOwner,
 } from "../actions";
+
+import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
 interface Profile {
   id: string;
@@ -39,6 +41,13 @@ export default function TeamAssignmentModal({
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Delete modal state
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: "employee" | "contractor" | "owner";
+    profileId: string;
+    name: string;
+  } | null>(null);
 
   const availableEmployees = profiles.filter(
     (p) => (p.role === "employee" || p.role === "admin") && !assignedEmployeeIds.includes(p.id)
@@ -80,52 +89,57 @@ export default function TeamAssignmentModal({
     setLoading(false);
   }
 
-  async function handleRemove(type: "employee" | "contractor" | "owner", profileId: string) {
-    if (!confirm("Remove this member from the project?")) return;
+  async function handleConfirmRemove() {
+    if (!deleteTarget) return;
     setLoading(true);
     let res;
-    if (type === "employee") res = await removeEmployee(projectId, profileId);
-    if (type === "contractor") res = await removeContractor(projectId, profileId);
-    if (type === "owner") res = await removeOwner(projectId, profileId);
+    if (deleteTarget.type === "employee") res = await removeEmployee(projectId, deleteTarget.profileId);
+    if (deleteTarget.type === "contractor") res = await removeContractor(projectId, deleteTarget.profileId);
+    if (deleteTarget.type === "owner") res = await removeOwner(projectId, deleteTarget.profileId);
 
-    if (res?.error) setError(res.error);
+    if (res?.error) {
+      setError(res.error);
+      setLoading(false);
+      return { error: res.error };
+    }
     setLoading(false);
+    setDeleteTarget(null);
   }
 
   return (
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-3.5 py-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 text-sm font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+        className="px-3.5 py-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[40px]"
       >
         <UserPlus className="w-4 h-4" />
         <span>Manage Team</span>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-white/15 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6 shadow-xl relative max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="absolute top-5 right-5 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400">
-                <Users className="w-5 h-5" />
+              <div className="w-11 h-11 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+                <Users className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">Project Team Allocations</h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <h3 className="text-lg font-bold text-slate-900">Project Team Allocations</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
                   Link authorized personnel to this project for role-based scoping
                 </p>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-xl border border-white/10 mb-6">
+            <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 mb-6">
               <button
                 type="button"
                 onClick={() => {
@@ -135,8 +149,8 @@ export default function TeamAssignmentModal({
                 }}
                 className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                   activeTab === "employee"
-                    ? "bg-emerald-500 text-white shadow-md"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
               >
                 Employees
@@ -150,8 +164,8 @@ export default function TeamAssignmentModal({
                 }}
                 className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                   activeTab === "contractor"
-                    ? "bg-amber-500 text-white shadow-md"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
               >
                 Contractors
@@ -165,8 +179,8 @@ export default function TeamAssignmentModal({
                 }}
                 className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                   activeTab === "owner"
-                    ? "bg-cyan-500 text-white shadow-md"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-500 hover:text-slate-900"
                 }`}
               >
                 Owners
@@ -174,14 +188,14 @@ export default function TeamAssignmentModal({
             </div>
 
             {error && (
-              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
                 {error}
               </div>
             )}
 
             {/* Allocation Form */}
-            <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-3 mb-6">
-              <p className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 mb-6">
+              <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                 Assign New {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
               </p>
 
@@ -189,7 +203,7 @@ export default function TeamAssignmentModal({
                 <select
                   value={selectedProfileId}
                   onChange={(e) => setSelectedProfileId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
                 >
                   <option value="">-- Select Person --</option>
                   {(activeTab === "employee"
@@ -212,7 +226,7 @@ export default function TeamAssignmentModal({
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder="Company / Agency Name (e.g. Apex Electricals)"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-sm"
                   />
                 </div>
               )}
@@ -221,7 +235,7 @@ export default function TeamAssignmentModal({
                 type="button"
                 onClick={handleAssign}
                 disabled={loading || !selectedProfileId}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white text-sm font-semibold shadow-md transition-all disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all disabled:opacity-50 min-h-[44px]"
               >
                 {loading ? "Assigning..." : "Add to Project"}
               </button>
@@ -229,7 +243,7 @@ export default function TeamAssignmentModal({
 
             {/* Current Members in this Category */}
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
                 Currently Assigned ({activeTab}s)
               </p>
 
@@ -245,17 +259,23 @@ export default function TeamAssignmentModal({
                   .map((p) => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 text-sm"
+                      className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs sm:text-sm"
                     >
                       <div>
-                        <p className="font-semibold text-white">{p.full_name}</p>
-                        <p className="text-xs text-slate-400">{p.phone || "No phone registered"}</p>
+                        <p className="font-semibold text-slate-900">{p.full_name}</p>
+                        <p className="text-xs text-slate-500">{p.phone || "No phone registered"}</p>
                       </div>
                       <button
                         type="button"
-                        onClick={() => handleRemove(activeTab, p.id)}
+                        onClick={() =>
+                          setDeleteTarget({
+                            type: activeTab,
+                            profileId: p.id,
+                            name: p.full_name,
+                          })
+                        }
                         disabled={loading}
-                        className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors"
+                        className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -264,17 +284,28 @@ export default function TeamAssignmentModal({
               </div>
             </div>
 
-            <div className="pt-6 border-t border-white/10 mt-6 flex justify-end">
+            <div className="pt-6 border-t border-slate-100 mt-6 flex justify-end">
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 text-sm font-medium transition-all"
+                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors min-h-[44px]"
               >
                 Close
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {deleteTarget && (
+        <DeleteConfirmationModal
+          isOpen={!!deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onConfirm={handleConfirmRemove}
+          itemName={deleteTarget.name}
+          itemType={`${deleteTarget.type} allocation`}
+          warningText={`Removing ${deleteTarget.name} from this project will revoke their role access and visibility to this project's blocks, units, and progress reports.`}
+        />
       )}
     </>
   );

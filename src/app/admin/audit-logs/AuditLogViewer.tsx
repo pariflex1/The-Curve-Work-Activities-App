@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, Filter, Search, Calendar, User, Clock, FileText } from "lucide-react";
+import { ShieldCheck, Filter, Search } from "lucide-react";
 
 interface AuditLog {
   id: string;
@@ -42,18 +42,18 @@ export default function AuditLogViewer({ logs }: AuditLogViewerProps) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Filter Bar */}
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Search */}
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search actor, action, notes..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-xs"
+            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white text-xs sm:text-sm"
           />
         </div>
 
@@ -63,7 +63,7 @@ export default function AuditLogViewer({ logs }: AuditLogViewerProps) {
           <select
             value={selectedAction}
             onChange={(e) => setSelectedAction(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl bg-slate-800 border border-white/10 text-white text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white"
           >
             <option value="all">All Actions ({actions.length})</option>
             {actions.map((a) => (
@@ -79,7 +79,7 @@ export default function AuditLogViewer({ logs }: AuditLogViewerProps) {
           <select
             value={selectedEntity}
             onChange={(e) => setSelectedEntity(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl bg-slate-800 border border-white/10 text-white text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+            className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white"
           >
             <option value="all">All Entities ({entities.length})</option>
             {entities.map((e) => (
@@ -92,29 +92,29 @@ export default function AuditLogViewer({ logs }: AuditLogViewerProps) {
       </div>
 
       {/* Logs Table */}
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl">
-        <div className="p-5 border-b border-white/10 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Shield className="w-5 h-5 text-purple-400" />
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-4 sm:p-5 border-b border-slate-200 flex items-center justify-between">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-purple-600" />
             <span>Immutable Audit Trail</span>
           </h2>
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-slate-500 font-medium">
             Showing {filteredLogs.length} of {logs.length} logged events
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-white/5 border-b border-white/10 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <table className="w-full text-left text-xs sm:text-sm text-slate-700">
+            <thead className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
               <tr>
-                <th className="px-6 py-4">Timestamp</th>
-                <th className="px-6 py-4">Actor</th>
-                <th className="px-6 py-4">Action</th>
-                <th className="px-6 py-4">Entity Type</th>
-                <th className="px-6 py-4">Metadata Payload</th>
+                <th className="px-5 py-3.5">Timestamp</th>
+                <th className="px-5 py-3.5">Actor</th>
+                <th className="px-5 py-3.5">Action</th>
+                <th className="px-5 py-3.5">Entity Type</th>
+                <th className="px-5 py-3.5">Metadata Payload</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 font-mono text-xs">
+            <tbody className="divide-y divide-slate-100 font-mono text-xs">
               {filteredLogs && filteredLogs.length > 0 ? (
                 filteredLogs.map((log) => {
                   const formattedDate = new Date(log.created_at).toLocaleString("en-IN", {
@@ -124,37 +124,37 @@ export default function AuditLogViewer({ logs }: AuditLogViewerProps) {
 
                   const actionColor =
                     log.action.includes("DELETE")
-                      ? "bg-red-500/10 text-red-400 border-red-500/30"
+                      ? "bg-red-50 text-red-700 border-red-200"
                       : log.action.includes("CREATE") || log.action.includes("ASSIGN")
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                      : "bg-cyan-500/10 text-cyan-400 border-cyan-500/30";
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                      : "bg-blue-50 text-blue-700 border-blue-200";
 
                   return (
-                    <tr key={log.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4 text-slate-400 whitespace-nowrap">
+                    <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-5 py-3.5 text-slate-500 whitespace-nowrap">
                         {formattedDate}
                       </td>
-                      <td className="px-6 py-4 font-sans text-white">
+                      <td className="px-5 py-3.5 font-sans text-slate-900 font-medium">
                         {log.profiles?.full_name ? (
                           <span>
                             {log.profiles.full_name}
-                            <span className="text-xs text-slate-500 ml-1">
+                            <span className="text-xs text-slate-400 ml-1">
                               ({log.profiles.role})
                             </span>
                           </span>
                         ) : (
-                          <span className="text-slate-500 italic">System / Anon</span>
+                          <span className="text-slate-400 italic">System / Anon</span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${actionColor}`}>
+                      <td className="px-5 py-3.5">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${actionColor}`}>
                           {log.action}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-slate-300 font-sans">
+                      <td className="px-5 py-3.5 text-slate-700 font-sans font-medium">
                         {log.entity_type}
                       </td>
-                      <td className="px-6 py-4 max-w-md truncate text-slate-400">
+                      <td className="px-5 py-3.5 max-w-md truncate text-slate-500">
                         {log.meta_json ? JSON.stringify(log.meta_json) : "—"}
                       </td>
                     </tr>
@@ -162,7 +162,7 @@ export default function AuditLogViewer({ logs }: AuditLogViewerProps) {
                 })
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-sans">
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-sans">
                     No audit records match the current filter.
                   </td>
                 </tr>

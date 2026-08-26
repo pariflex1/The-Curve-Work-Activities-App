@@ -288,7 +288,7 @@ CREATE POLICY "units_delete" ON units FOR DELETE USING (
 
 CREATE POLICY "activity_master_select" ON activity_master FOR SELECT USING (true);
 CREATE POLICY "activity_master_insert" ON activity_master FOR INSERT WITH CHECK (
-  public.get_my_role() = 'admin'
+  public.get_my_role() IN ('admin', 'employee')
 );
 CREATE POLICY "activity_master_update" ON activity_master FOR UPDATE USING (
   public.get_my_role() = 'admin'
@@ -312,6 +312,12 @@ CREATE POLICY "unit_activities_select" ON unit_activities FOR SELECT USING (
 );
 CREATE POLICY "unit_activities_insert" ON unit_activities FOR INSERT WITH CHECK (
   public.get_my_role() = 'admin'
+  OR (
+    public.get_my_role() = 'employee'
+    AND public.is_assigned_to_project(
+      (SELECT b.project_id FROM units u JOIN blocks b ON b.id = u.block_id WHERE u.id = unit_activities.unit_id)
+    )
+  )
 );
 CREATE POLICY "unit_activities_update" ON unit_activities FOR UPDATE USING (
   public.get_my_role() = 'admin'
@@ -324,6 +330,12 @@ CREATE POLICY "unit_activities_update" ON unit_activities FOR UPDATE USING (
 );
 CREATE POLICY "unit_activities_delete" ON unit_activities FOR DELETE USING (
   public.get_my_role() = 'admin'
+  OR (
+    public.get_my_role() = 'employee'
+    AND public.is_assigned_to_project(
+      (SELECT b.project_id FROM units u JOIN blocks b ON b.id = u.block_id WHERE u.id = unit_activities.unit_id)
+    )
+  )
 );
 
 CREATE POLICY "progress_reports_select" ON progress_reports FOR SELECT USING (
@@ -344,6 +356,12 @@ CREATE POLICY "progress_reports_insert" ON progress_reports FOR INSERT WITH CHEC
   OR (
     public.get_my_role() = 'contractor'
     AND contractor_id IN (SELECT pc.id FROM project_contractors pc WHERE pc.profile_id = public.get_my_profile_id())
+  )
+  OR (
+    public.get_my_role() = 'employee'
+    AND public.is_assigned_to_project(
+      (SELECT b.project_id FROM unit_activities ua JOIN units u ON u.id = ua.unit_id JOIN blocks b ON b.id = u.block_id WHERE ua.id = progress_reports.unit_activity_id)
+    )
   )
 );
 CREATE POLICY "progress_reports_update" ON progress_reports FOR UPDATE USING (
@@ -377,6 +395,16 @@ CREATE POLICY "progress_report_photos_insert" ON progress_report_photos FOR INSE
       SELECT 1 FROM progress_reports pr
       WHERE pr.id = progress_report_photos.progress_report_id
       AND pr.contractor_id IN (SELECT pc.id FROM project_contractors pc WHERE pc.profile_id = public.get_my_profile_id())
+    )
+  )
+  OR (
+    public.get_my_role() = 'employee'
+    AND EXISTS(
+      SELECT 1 FROM progress_reports pr
+      WHERE pr.id = progress_report_photos.progress_report_id
+      AND public.is_assigned_to_project(
+        (SELECT b.project_id FROM unit_activities ua JOIN units u ON u.id = ua.unit_id JOIN blocks b ON b.id = u.block_id WHERE ua.id = pr.unit_activity_id)
+      )
     )
   )
 );

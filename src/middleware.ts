@@ -12,6 +12,18 @@ const roleRoutes: Record<string, string> = {
   "/owner": "owner",
 };
 
+async function getUserRole(user: any, supabase: any): Promise<string | null> {
+  if (user?.user_metadata?.role) {
+    return user.user_metadata.role;
+  }
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  return profile?.role || null;
+}
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -36,26 +48,21 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  const pathname = request.nextUrl.pathname;
+
   // Refresh the session
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-
   // Allow public routes
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
     // If user is already logged in, redirect to their dashboard
     if (user && (pathname === "/login" || pathname === "/signup")) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("user_id", user.id)
-        .single();
-
-      if (profile) {
+      const role = await getUserRole(user, supabase);
+      if (role) {
         const url = request.nextUrl.clone();
-        url.pathname = `/${profile.role}`;
+        url.pathname = `/${role}`;
         return NextResponse.redirect(url);
       }
     }
@@ -72,16 +79,11 @@ export async function middleware(request: NextRequest) {
   // Check role-based route access
   for (const [routePrefix, requiredRole] of Object.entries(roleRoutes)) {
     if (pathname.startsWith(routePrefix)) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("user_id", user.id)
-        .single();
-
-      if (!profile || profile.role !== requiredRole) {
+      const role = await getUserRole(user, supabase);
+      if (!role || role !== requiredRole) {
         // Redirect to user's own role dashboard
         const url = request.nextUrl.clone();
-        url.pathname = profile ? `/${profile.role}` : "/login";
+        url.pathname = role ? `/${role}` : "/login";
         return NextResponse.redirect(url);
       }
     }
@@ -89,15 +91,10 @@ export async function middleware(request: NextRequest) {
 
   // Root path: redirect to role dashboard
   if (pathname === "/") {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("user_id", user.id)
-      .single();
-
-    if (profile) {
+    const role = await getUserRole(user, supabase);
+    if (role) {
       const url = request.nextUrl.clone();
-      url.pathname = `/${profile.role}`;
+      url.pathname = `/${role}`;
       return NextResponse.redirect(url);
     }
   }
@@ -107,6 +104,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|txt)$).*)",
   ],
 };
+
