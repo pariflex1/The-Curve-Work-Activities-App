@@ -54,52 +54,70 @@ export default function PaymentFormModal({
       return;
     }
 
+    let isMounted = true;
+
     async function loadContractors() {
       setFetchingContractors(true);
-      const supabase = createBrowserClient();
+      try {
+        const supabase = createBrowserClient();
 
-      // 1. Fetch project assigned contractors
-      const { data: pc } = await supabase
-        .from("project_contractors")
-        .select("id, company_name, profiles(full_name)")
-        .eq("project_id", projectId);
+        // 1. Fetch project assigned contractors
+        const { data: pc } = await supabase
+          .from("project_contractors")
+          .select("id, company_name, profiles(full_name)")
+          .eq("project_id", projectId);
 
-      if (pc && pc.length > 0) {
-        setContractorList(
-          pc.map((c: any) => ({
-            id: c.id,
-            company_name: c.company_name,
-            full_name: c.profiles?.full_name,
-          }))
-        );
-      } else {
-        // 2. Fallback to all active contractor profiles
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, full_name, company_name")
-          .eq("role", "contractor");
+        if (!isMounted) return;
 
-        if (profiles && profiles.length > 0) {
+        if (pc && pc.length > 0) {
           setContractorList(
-            profiles.map((p: any) => ({
-              id: p.id,
-              company_name: p.company_name || p.full_name,
-              full_name: p.full_name,
+            pc.map((c: any) => ({
+              id: c.id,
+              company_name: c.company_name,
+              full_name: c.profiles?.full_name,
             }))
           );
         } else {
-          // 3. Fallback demo contractor
-          setContractorList([
-            { id: "demo-1", company_name: "Apex Civil Structures", full_name: "Amit Patel" },
-            { id: "demo-2", company_name: "Volt MEP Solutions", full_name: "Sunil Verma" },
-          ]);
+          // 2. Fallback to all active contractor profiles
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, full_name, company_name")
+            .eq("role", "contractor");
+
+          if (!isMounted) return;
+
+          if (profiles && profiles.length > 0) {
+            setContractorList(
+              profiles.map((p: any) => ({
+                id: p.id,
+                company_name: p.company_name || p.full_name,
+                full_name: p.full_name,
+              }))
+            );
+          } else {
+            // 3. Fallback demo contractor
+            setContractorList([
+              { id: "demo-1", company_name: "Apex Civil Structures", full_name: "Amit Patel" },
+              { id: "demo-2", company_name: "Volt MEP Solutions", full_name: "Sunil Verma" },
+            ]);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading contractors:", err);
+      } finally {
+        if (isMounted) {
+          setFetchingContractors(false);
         }
       }
-      setFetchingContractors(false);
     }
 
     loadContractors();
-  }, [isOpen, projectId, contractors]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, projectId]);
+
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
