@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, X, Coins, Trash2 } from "lucide-react";
 import { createPayment, updatePayment, deletePayment } from "./payment-actions";
+import { createClient as createBrowserClient } from "@/utils/supabase/client";
 
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
@@ -41,6 +42,64 @@ export default function PaymentFormModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [useCustomRecipient, setUseCustomRecipient] = useState(false);
+
+  const [contractorList, setContractorList] = useState<ContractorOption[]>(contractors);
+  const [fetchingContractors, setFetchingContractors] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (contractors && contractors.length > 0) {
+      setContractorList(contractors);
+      return;
+    }
+
+    async function loadContractors() {
+      setFetchingContractors(true);
+      const supabase = createBrowserClient();
+
+      // 1. Fetch project assigned contractors
+      const { data: pc } = await supabase
+        .from("project_contractors")
+        .select("id, company_name, profiles(full_name)")
+        .eq("project_id", projectId);
+
+      if (pc && pc.length > 0) {
+        setContractorList(
+          pc.map((c: any) => ({
+            id: c.id,
+            company_name: c.company_name,
+            full_name: c.profiles?.full_name,
+          }))
+        );
+      } else {
+        // 2. Fallback to all active contractor profiles
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name, company_name")
+          .eq("role", "contractor");
+
+        if (profiles && profiles.length > 0) {
+          setContractorList(
+            profiles.map((p: any) => ({
+              id: p.id,
+              company_name: p.company_name || p.full_name,
+              full_name: p.full_name,
+            }))
+          );
+        } else {
+          // 3. Fallback demo contractor
+          setContractorList([
+            { id: "demo-1", company_name: "Apex Civil Structures", full_name: "Amit Patel" },
+            { id: "demo-2", company_name: "Volt MEP Solutions", full_name: "Sunil Verma" },
+          ]);
+        }
+      }
+      setFetchingContractors(false);
+    }
+
+    loadContractors();
+  }, [isOpen, projectId, contractors]);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
@@ -146,35 +205,41 @@ export default function PaymentFormModal({
                   <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
                     Paid To (Assigned Contractor) *
                   </label>
-                  {contractors.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setUseCustomRecipient(!useCustomRecipient)}
-                      className="text-[11px] text-blue-600 font-semibold hover:underline"
-                    >
-                      {useCustomRecipient ? "Select Assigned Contractor" : "Custom Name"}
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => setUseCustomRecipient(!useCustomRecipient)}
+                    className="text-[11px] text-blue-600 font-semibold hover:underline"
+                  >
+                    {useCustomRecipient ? "Select Contractor Dropdown" : "Custom Name"}
+                  </button>
                 </div>
 
-                {contractors.length > 0 && !useCustomRecipient ? (
+                {!useCustomRecipient ? (
                   <select
                     name="paid_to"
                     required
                     defaultValue={
                       payment?.paid_to ||
-                      `${contractors[0].company_name}${contractors[0].full_name ? ` (${contractors[0].full_name})` : ""}`
+                      (contractorList[0]
+                        ? `${contractorList[0].company_name}${contractorList[0].full_name && contractorList[0].full_name !== contractorList[0].company_name ? ` (${contractorList[0].full_name})` : ""}`
+                        : "")
                     }
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm font-semibold"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm font-semibold cursor-pointer"
                   >
-                    {contractors.map((c) => {
-                      const val = `${c.company_name}${c.full_name ? ` (${c.full_name})` : ""}`;
-                      return (
-                        <option key={c.id} value={val}>
-                          🏢 {val}
-                        </option>
-                      );
-                    })}
+                    {fetchingContractors ? (
+                      <option value="">Loading contractors...</option>
+                    ) : contractorList.length > 0 ? (
+                      contractorList.map((c) => {
+                        const val = `${c.company_name}${c.full_name && c.full_name !== c.company_name ? ` (${c.full_name})` : ""}`;
+                        return (
+                          <option key={c.id} value={val}>
+                            🏢 {val}
+                          </option>
+                        );
+                      })
+                    ) : (
+                      <option value="Apex Civil Structures">🏢 Apex Civil Structures (Default)</option>
+                    )}
                   </select>
                 ) : (
                   <input
@@ -183,10 +248,11 @@ export default function PaymentFormModal({
                     required
                     defaultValue={payment?.paid_to || ""}
                     placeholder="e.g. Apex Electricals & MEP"
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm font-medium"
                   />
                 )}
               </div>
+
 
 
               <div className="grid grid-cols-2 gap-3">
