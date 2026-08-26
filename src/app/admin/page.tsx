@@ -19,8 +19,6 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 
 export const dynamic = "force-dynamic";
 
-import AppShell from "@/components/AppShell";
-
 export default async function AdminDashboard() {
   const supabase = await createClient();
   const {
@@ -44,9 +42,10 @@ export default async function AdminDashboard() {
     supabase.from("profiles").select("*", { count: "exact" }).order("created_at", { ascending: false }),
   ]);
 
+
   return (
-    <AppShell role="admin" userName={profile?.full_name} userEmail={user.email}>
-      <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto space-y-8 sm:space-y-10">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-10 font-sans">
+      <div className="max-w-7xl mx-auto space-y-8 sm:space-y-10">
         {/* Header */}
         <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -64,7 +63,24 @@ export default async function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap">
+            <PWAInstallButton />
             <UserManagementModal profiles={allProfiles || []} triggerLabel="Manage Accounts" />
+            <UserManualModal role="admin" />
+            <Link
+              href="/"
+              className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-semibold transition-colors min-h-[42px] flex items-center"
+            >
+              Home
+            </Link>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs sm:text-sm font-semibold transition-colors min-h-[42px] flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Sign Out</span>
+              </button>
+            </form>
           </div>
         </div>
 
@@ -217,7 +233,6 @@ export default async function AdminDashboard() {
           </div>
         </div>
       </div>
-    </AppShell>
+    </main>
   );
 }
-

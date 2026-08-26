@@ -6,8 +6,6 @@ import PaymentFormModal from "@/app/admin/payments/PaymentFormModal";
 import UserManualModal from "@/components/UserManualModal";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
-import AppShell from "@/components/AppShell";
-
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
@@ -34,8 +32,8 @@ export default async function ProjectsPage() {
   const completedCount = projects?.filter((p) => p.status === "completed").length || 0;
 
   return (
-    <AppShell role="admin">
-      <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <main className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
@@ -59,10 +57,18 @@ export default async function ProjectsPage() {
           </div>
 
           <div className="flex items-center gap-2.5 self-end sm:self-auto flex-wrap">
+            <PWAInstallButton />
+            <UserManualModal role="admin" />
+            <Link
+              href="/"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors min-h-[40px] flex items-center"
+            >
+              Home
+            </Link>
             <ProjectFormModal />
           </div>
-        </div>
 
+        </div>
 
         {/* Status Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -188,8 +194,6 @@ export default async function ProjectsPage() {
           )}
         </div>
       </div>
-    </AppShell>
+    </main>
   );
 }
-
-
