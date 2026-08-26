@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, X, Coins, Trash2 } from "lucide-react";
+import { Plus, X, Coins, Trash2, Building2, CheckCircle2 } from "lucide-react";
 import { createPayment, updatePayment, deletePayment } from "./payment-actions";
 import { createClient as createBrowserClient } from "@/utils/supabase/client";
 
@@ -11,6 +11,16 @@ export interface ContractorOption {
   id: string;
   company_name: string;
   full_name?: string | null;
+}
+
+export interface UnitActivityOption {
+  id: string;
+  unit_number: string;
+  block_name: string;
+  activity_name: string;
+  contractor_name: string;
+  estimated_cost: number;
+  progress_percentage: number;
 }
 
 interface PaymentFormModalProps {
@@ -44,88 +54,126 @@ export default function PaymentFormModal({
   const [useCustomRecipient, setUseCustomRecipient] = useState(false);
 
   const [contractorList, setContractorList] = useState<ContractorOption[]>(contractors);
-  const [fetchingContractors, setFetchingContractors] = useState(false);
+  const [unitActivitiesList, setUnitActivitiesList] = useState<UnitActivityOption[]>([]);
+  const [selectedUnitActivityId, setSelectedUnitActivityId] = useState<string>(unitActivityId || "");
+  const [selectedContractorName, setSelectedContractorName] = useState<string>(payment?.paid_to || "");
+  const [fetchingData, setFetchingData] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
 
-    if (contractors && contractors.length > 0) {
-      setContractorList(contractors);
-      return;
-    }
-
     let isMounted = true;
 
-    async function loadContractors() {
-      setFetchingContractors(true);
+    async function loadData() {
+      setFetchingData(true);
       try {
         const supabase = createBrowserClient();
 
-        // 1. Fetch project assigned contractors
-        const { data: pc } = await supabase
-          .from("project_contractors")
-          .select("id, company_name, profiles(full_name)")
-          .eq("project_id", projectId);
+        // 1. Fetch unit activities for this project
+        const { data: ua } = await supabase
+          .from("unit_activities")
+          .select(`
+            id,
+            estimated_cost,
+            progress_percentage,
+            activity_master ( name ),
+            units!inner (
+              unit_number,
+              blocks!inner (
+                name,
+                project_id
+              )
+            ),
+            project_contractors (
+              company_name,
+              profiles ( full_name )
+            )
+          `)
+          .eq("units.blocks.project_id", projectId);
 
         if (!isMounted) return;
 
-        if (pc && pc.length > 0) {
-          setContractorList(
-            pc.map((c: any) => ({
-              id: c.id,
-              company_name: c.company_name,
-              full_name: c.profiles?.full_name,
-            }))
-          );
+        let list: UnitActivityOption[] = [];
+        if (ua && ua.length > 0) {
+          list = ua.map((item: any) => {
+            const blockName = item.units?.blocks?.name || "Block";
+            const unitNumber = item.units?.unit_number || "Unit";
+            const activityName = item.activity_master?.name || "Activity";
+            const contractorName = item.project_contractors
+              ? `${item.project_contractors.company_name}${
+                  item.project_contractors.profiles?.full_name
+                    ? ` (${item.project_contractors.profiles.full_name})`
+                    : ""
+                }`
+              : "Unassigned";
+
+            return {
+              id: item.id,
+              unit_number: unitNumber,
+              block_name: blockName,
+              activity_name: activityName,
+              contractor_name: contractorName,
+              estimated_cost: Number(item.estimated_cost) || 0,
+              progress_percentage: Number(item.progress_percentage) || 0,
+            };
+          });
+
+          setUnitActivitiesList(list);
+
+          const initialId = unitActivityId || list[0]?.id || "";
+          setSelectedUnitActivityId(initialId);
+          const matched = list.find((a) => a.id === initialId);
+          if (matched && matched.contractor_name !== "Unassigned" && !selectedContractorName) {
+            setSelectedContractorName(matched.contractor_name);
+          }
+        }
+
+        // 2. Fetch project contractors list
+        if (contractors && contractors.length > 0) {
+          setContractorList(contractors);
         } else {
-          // 2. Fallback to all active contractor profiles
-          const { data: profiles } = await supabase
-            .from("profiles")
-            .select("id, full_name, company_name")
-            .eq("role", "contractor");
+          const { data: pc } = await supabase
+            .from("project_contractors")
+            .select("id, company_name, profiles(full_name)")
+            .eq("project_id", projectId);
 
           if (!isMounted) return;
 
-          if (profiles && profiles.length > 0) {
+          if (pc && pc.length > 0) {
             setContractorList(
-              profiles.map((p: any) => ({
-                id: p.id,
-                company_name: p.company_name || p.full_name,
-                full_name: p.full_name,
+              pc.map((c: any) => ({
+                id: c.id,
+                company_name: c.company_name,
+                full_name: c.profiles?.full_name,
               }))
             );
-          } else {
-            // 3. Fallback demo contractor
-            setContractorList([
-              { id: "demo-1", company_name: "Apex Civil Structures", full_name: "Amit Patel" },
-              { id: "demo-2", company_name: "Volt MEP Solutions", full_name: "Sunil Verma" },
-            ]);
           }
         }
       } catch (err) {
-        console.error("Error loading contractors:", err);
+        console.error("Error loading payment connection data:", err);
       } finally {
         if (isMounted) {
-          setFetchingContractors(false);
+          setFetchingData(false);
         }
       }
     }
 
-    loadContractors();
+    loadData();
 
     return () => {
       isMounted = false;
     };
-  }, [isOpen, projectId]);
+  }, [isOpen, projectId, unitActivityId, contractors]);
 
+  const selectedActivity = unitActivitiesList.find((a) => a.id === selectedUnitActivityId);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError(null);
 
     formData.append("project_id", projectId);
-    if (unitActivityId) {
-      formData.append("unit_activity_id", unitActivityId);
+    if (selectedUnitActivityId) {
+      formData.append("unit_activity_id", selectedUnitActivityId);
     }
 
     let res;
@@ -191,7 +239,7 @@ export default function PaymentFormModal({
                   {isEdit ? "Edit Payment Record" : "Disburse / Record Payment"}
                 </h3>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Financial transaction record with balance recalculation &amp; audit logging
+                  Connect payment directly to Unit Work Activity &amp; Contractor
                 </p>
               </div>
             </div>
@@ -203,6 +251,56 @@ export default function PaymentFormModal({
             )}
 
             <form action={handleSubmit} className="space-y-4">
+              {/* 1. Unit & Work Activity Selector */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                    Unit &amp; Work Activity *
+                  </label>
+                  {selectedActivity && (
+                    <span className="text-[11px] font-bold text-emerald-700 font-mono">
+                      Progress: {selectedActivity.progress_percentage}%
+                    </span>
+                  )}
+                </div>
+                <select
+                  name="unit_activity_id"
+                  required
+                  value={selectedUnitActivityId}
+                  onChange={(e) => {
+                    setSelectedUnitActivityId(e.target.value);
+                    const matched = unitActivitiesList.find((a) => a.id === e.target.value);
+                    if (matched && matched.contractor_name !== "Unassigned") {
+                      setSelectedContractorName(matched.contractor_name);
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-xs sm:text-sm font-semibold cursor-pointer"
+                >
+                  {fetchingData ? (
+                    <option value="">Loading unit activities...</option>
+                  ) : unitActivitiesList.length > 0 ? (
+                    unitActivitiesList.map((ua) => (
+                      <option key={ua.id} value={ua.id}>
+                        🏢 {ua.block_name} → Unit {ua.unit_number} → {ua.activity_name} ({ua.contractor_name})
+                      </option>
+                    ))
+                  ) : (
+                    <option value="">No unit activities found for this project</option>
+                  )}
+                </select>
+                {selectedActivity && (
+                  <div className="mt-2 p-2.5 rounded-xl bg-blue-50/60 border border-blue-100 text-xs text-blue-950 flex items-center justify-between font-medium">
+                    <span className="truncate">
+                      Est. Cost: <strong className="font-bold font-mono text-slate-900">₹{selectedActivity.estimated_cost.toLocaleString("en-IN")}</strong>
+                    </span>
+                    <span className="text-[11px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">
+                      {selectedActivity.progress_percentage}% Verified
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Amount Paid */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                   Amount Paid (₹) *
@@ -212,23 +310,24 @@ export default function PaymentFormModal({
                   type="number"
                   step="100"
                   required
-                  defaultValue={payment?.amount || ""}
+                  defaultValue={payment?.amount || (selectedActivity ? selectedActivity.estimated_cost * (selectedActivity.progress_percentage / 100) : "")}
                   placeholder="e.g. 50000"
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-bold text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
                 />
               </div>
 
+              {/* 3. Paid To Contractor */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                    Paid To (Assigned Contractor) *
+                    Paid To (Contractor) *
                   </label>
                   <button
                     type="button"
                     onClick={() => setUseCustomRecipient(!useCustomRecipient)}
                     className="text-[11px] text-blue-600 font-semibold hover:underline"
                   >
-                    {useCustomRecipient ? "Select Contractor Dropdown" : "Custom Name"}
+                    {useCustomRecipient ? "Select Contractor Dropdown" : "Custom Recipient"}
                   </button>
                 </div>
 
@@ -236,17 +335,11 @@ export default function PaymentFormModal({
                   <select
                     name="paid_to"
                     required
-                    defaultValue={
-                      payment?.paid_to ||
-                      (contractorList[0]
-                        ? `${contractorList[0].company_name}${contractorList[0].full_name && contractorList[0].full_name !== contractorList[0].company_name ? ` (${contractorList[0].full_name})` : ""}`
-                        : "")
-                    }
+                    value={selectedContractorName || (contractorList[0] ? `${contractorList[0].company_name}${contractorList[0].full_name && contractorList[0].full_name !== contractorList[0].company_name ? ` (${contractorList[0].full_name})` : ""}` : "")}
+                    onChange={(e) => setSelectedContractorName(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm font-semibold cursor-pointer"
                   >
-                    {fetchingContractors ? (
-                      <option value="">Loading contractors...</option>
-                    ) : contractorList.length > 0 ? (
+                    {contractorList.length > 0 ? (
                       contractorList.map((c) => {
                         const val = `${c.company_name}${c.full_name && c.full_name !== c.company_name ? ` (${c.full_name})` : ""}`;
                         return (
@@ -255,6 +348,8 @@ export default function PaymentFormModal({
                           </option>
                         );
                       })
+                    ) : selectedActivity && selectedActivity.contractor_name !== "Unassigned" ? (
+                      <option value={selectedActivity.contractor_name}>🏢 {selectedActivity.contractor_name}</option>
                     ) : (
                       <option value="Apex Civil Structures">🏢 Apex Civil Structures (Default)</option>
                     )}
@@ -264,14 +359,13 @@ export default function PaymentFormModal({
                     name="paid_to"
                     type="text"
                     required
-                    defaultValue={payment?.paid_to || ""}
+                    value={selectedContractorName}
+                    onChange={(e) => setSelectedContractorName(e.target.value)}
                     placeholder="e.g. Apex Electricals & MEP"
                     className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm font-medium"
                   />
                 )}
               </div>
-
-
 
               <div className="grid grid-cols-2 gap-3">
                 <div>

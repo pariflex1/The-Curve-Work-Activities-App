@@ -26,9 +26,14 @@ export async function createPayment(formData: FormData) {
   const paymentDate = (formData.get("payment_date") as string) || new Date().toISOString().split("T")[0];
   const notes = (formData.get("notes") as string) || null;
 
+  if (!unitActivityId) {
+    return { error: "Payment must be connected to a specific Unit Work Activity." };
+  }
+
   if (isNaN(amount) || amount <= 0) {
     return { error: "Payment amount must be greater than 0." };
   }
+
 
   const { data, error } = await supabase
     .from("payments")
