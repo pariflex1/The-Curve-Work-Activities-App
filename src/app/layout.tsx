@@ -20,10 +20,17 @@ export const metadata: Metadata = {
     title: "The Curve",
   },
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/the-curve-logo.webp", type: "image/webp" },
+      { url: "/icon-192.png", sizes: "192x192" },
+      { url: "/icon-512.png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/the-curve-logo.webp" }],
+    shortcut: "/the-curve-logo.webp",
   },
 };
+
+
 
 export const viewport: Viewport = {
   themeColor: "#000000",

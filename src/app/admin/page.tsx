@@ -49,13 +49,16 @@ export default async function AdminDashboard() {
         {/* Header */}
         <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-black flex items-center justify-center text-white shadow-sm shrink-0">
-              <ShieldCheck className="w-7 h-7" />
-            </div>
+            <img
+              src="/the-curve-logo.webp"
+              alt="The Curve Logo"
+              className="h-12 w-auto object-contain shrink-0"
+            />
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-black tracking-tight">
                 Administration Portal
               </h1>
+
               <p className="text-sm font-normal text-slate-500 mt-1">
                 Welcome, <strong className="text-black font-semibold">{profile?.full_name || "Admin"}</strong> — Master System Architecture &amp; Governance
               </p>

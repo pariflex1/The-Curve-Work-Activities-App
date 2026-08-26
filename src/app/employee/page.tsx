@@ -41,13 +41,16 @@ export default async function EmployeeDashboard() {
         {/* Header */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
-              <UserCheck className="w-6 h-6" />
-            </div>
+            <img
+              src="/the-curve-logo.webp"
+              alt="The Curve Logo"
+              className="h-10 sm:h-12 w-auto object-contain shrink-0"
+            />
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                 Employee Workspace
               </h1>
+
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
                 Welcome, <strong className="text-slate-800">{profile?.full_name || "Employee"}</strong> — Assigned Projects &amp; Field Operations
               </p>

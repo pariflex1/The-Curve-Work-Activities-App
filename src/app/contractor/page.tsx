@@ -87,14 +87,17 @@ export default async function ContractorDashboard() {
         {/* Header */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-black flex items-center justify-center text-white shadow-sm shrink-0">
-              <Briefcase className="w-6 h-6" />
-            </div>
+            <img
+              src="/the-curve-logo.webp"
+              alt="The Curve Logo"
+              className="h-10 sm:h-12 w-auto object-contain shrink-0"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                   Contractor Portal
                 </h1>
+
                 <span className="text-[11px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700">
                   Read-Only
                 </span>

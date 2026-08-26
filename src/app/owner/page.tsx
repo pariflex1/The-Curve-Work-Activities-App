@@ -73,13 +73,16 @@ export default async function OwnerDashboard() {
         {/* Header */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center text-white shadow-md shadow-purple-500/20 shrink-0">
-              <Crown className="w-6 h-6" />
-            </div>
+            <img
+              src="/the-curve-logo.webp"
+              alt="The Curve Logo"
+              className="h-10 sm:h-12 w-auto object-contain shrink-0"
+            />
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                 Owner Financial Portfolio
               </h1>
+
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
                 Welcome, <strong className="text-slate-800">{profile?.full_name || "Owner"}</strong> — Portfolio Balances &amp; Payment Ledger
               </p>
