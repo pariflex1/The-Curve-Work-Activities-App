@@ -16,7 +16,7 @@ import {
 import UserManualModal from "@/components/UserManualModal";
 import UserManagementModal from "./users/UserManagementModal";
 import PWAInstallButton from "@/components/PWAInstallButton";
-import WorkAndPaymentHub from "@/components/WorkAndPaymentHub";
+import AdminWorkPaymentConsole from "./AdminWorkPaymentConsole";
 
 export const dynamic = "force-dynamic";
 
@@ -28,14 +28,14 @@ export default async function AdminDashboard() {
 
   if (!user) redirect("/login");
 
-  // Fetch profile, metrics, and full hierarchy concurrently
+  // Fetch profile, metrics, and detailed project hierarchy concurrently
   const [
     { data: profile },
     { count: projectCount },
     { count: blockCount },
     { count: unitCount },
     { data: allProfiles, count: userCount },
-    { data: fullProjects },
+    { data: projectsData },
   ] = await Promise.all([
     supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle(),
     supabase.from("projects").select("*", { count: "exact", head: true }),
@@ -48,27 +48,42 @@ export default async function AdminDashboard() {
         id,
         name,
         status,
+        location,
         blocks (
           id,
           name,
+          sort_order,
           units (
             id,
             unit_number,
             floor,
+            unit_type,
             status,
             unit_activities (
               id,
               estimated_cost,
               progress_percentage,
               status,
-              notes,
-              activity_master ( name, category ),
+              activity_master ( id, name, category ),
               project_contractors (
+                id,
                 company_name,
                 profiles ( full_name )
+              ),
+              payments (
+                id,
+                amount,
+                paid_to,
+                payment_date,
+                payment_type
               )
             )
           )
+        ),
+        project_contractors (
+          id,
+          company_name,
+          profiles ( full_name )
         )
       `)
       .order("created_at", { ascending: false }),
@@ -181,8 +196,10 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* Interactive Work Activities & Payment Hub */}
-        <WorkAndPaymentHub projects={fullProjects || []} />
+        {/* Work Activities & Disbursement Interactive Console */}
+        {projectsData && projectsData.length > 0 && (
+          <AdminWorkPaymentConsole projects={(projectsData as any) || []} />
+        )}
 
         {/* Management Modules */}
         <div className="space-y-6">
