@@ -36,11 +36,15 @@ export interface UserProfileItem {
 interface UserManagementModalProps {
   profiles: UserProfileItem[];
   triggerLabel?: string;
+  className?: string;
+  customTrigger?: React.ReactNode;
 }
 
 export default function UserManagementModal({
   profiles = [],
   triggerLabel = "Users & Team Directory",
+  className,
+  customTrigger,
 }: UserManagementModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"directory" | "create">("create");
@@ -91,12 +95,14 @@ export default function UserManagementModal({
       setError(res.error);
       setLoading(false);
     } else {
-      setSuccessMsg(`User "${fullName}" created successfully! Login: ${phone} / Password: ${password}`);
+      setSuccessMsg(
+        `Account created for ${fullName} (${role.toUpperCase()}). Credentials: Mobile: ${phone} / Password: ${password}`
+      );
       setFullName("");
       setPhone("");
-      setPassword("");
       setEmail("");
       setCompanyName("");
+      setPassword("");
       setLoading(false);
     }
   }
@@ -104,29 +110,30 @@ export default function UserManagementModal({
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
     if (!resetTarget) return;
+
     setResetLoading(true);
     setResetError(null);
     setResetSuccess(null);
 
-    const res = await updateUserPassword(resetTarget.id, newPassword);
+    const res = await updateUserPassword(resetTarget.user_id, newPassword);
     if (res?.error) {
       setResetError(res.error);
-      setResetLoading(false);
     } else {
-      setResetSuccess(`Password updated for "${resetTarget.full_name}".`);
+      setResetSuccess(`Password successfully updated for ${resetTarget.full_name}. New password: ${newPassword}`);
       setNewPassword("");
-      setResetLoading(false);
     }
+    setResetLoading(false);
   }
 
   async function handleConfirmDeleteUser() {
     if (!deleteTarget) return;
     const res = await deleteUserAccount(deleteTarget.id);
     if (res?.error) {
-      return { error: res.error };
+      throw new Error(res.error);
     }
     setDeleteTarget(null);
   }
+
 
   function generateRandomPassword() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%";
@@ -140,6 +147,7 @@ export default function UserManagementModal({
 
   const filteredProfiles = profiles.filter((p) => {
     const matchesSearch =
+      !searchQuery.trim() ||
       p.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.phone && p.phone.includes(searchQuery)) ||
       p.role.toLowerCase().includes(searchQuery.toLowerCase());
@@ -149,18 +157,34 @@ export default function UserManagementModal({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => {
-          setIsOpen(true);
-          setError(null);
-          setSuccessMsg(null);
-        }}
-        className="px-4 py-2.5 rounded-xl bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all min-h-[42px]"
-      >
-        <UserPlus className="w-4 h-4" />
-        <span>{triggerLabel}</span>
-      </button>
+      {customTrigger ? (
+        <div
+          onClick={() => {
+            setIsOpen(true);
+            setError(null);
+            setSuccessMsg(null);
+          }}
+          className="cursor-pointer"
+        >
+          {customTrigger}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setIsOpen(true);
+            setError(null);
+            setSuccessMsg(null);
+          }}
+          className={
+            className ||
+            "px-4 py-2.5 rounded-xl bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all min-h-[42px]"
+          }
+        >
+          <UserPlus className="w-4 h-4" />
+          <span>{triggerLabel}</span>
+        </button>
+      )}
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
