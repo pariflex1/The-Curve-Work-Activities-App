@@ -9,15 +9,17 @@ import {
   Building2,
   HardHat,
   Users,
-  CreditCard,
+  Coins,
   Camera,
   Layers,
   Sparkles,
-  HelpCircle,
+  ShieldCheck,
   ShieldAlert,
   ArrowRight,
   ClipboardCheck,
   FileSpreadsheet,
+  FileText,
+  Eye,
 } from "lucide-react";
 
 export type UserRoleType = "admin" | "employee" | "contractor" | "owner";
@@ -36,32 +38,33 @@ export default function UserManualModal({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSection, setSelectedSection] = useState<string>("overview");
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   // Role metadata and title config
   const roleConfig = {
     admin: {
-      badge: "Administrator Guide",
+      badge: "Administrator Master Guide",
       title: "The Curve — Administrator User Manual",
-      subtitle: "Full control over projects, blocks, units, activity catalogs, team allocations, payments, and audit logs.",
-      color: "blue",
+      subtitle:
+        "Full control over projects, blocks, units, activity catalogs, team allocations, payments, reports, and audit logs.",
     },
     employee: {
       badge: "Site Engineer / Supervisor Guide",
       title: "The Curve — Site Engineer Operational Manual",
-      subtitle: "Provision unit work activities, assign contractors, record site inspections, upload geo-tagged photos, and update progress.",
-      color: "emerald",
+      subtitle:
+        "Provision unit work activities, assign contractors, record site inspections, upload geo-tagged photos, and update progress.",
     },
     contractor: {
       badge: "Contractor Portal Guide",
       title: "The Curve — Contractor Work & Task Guide",
-      subtitle: "Access assigned work orders, check unit specifications, track completion milestones, and view inspection history.",
-      color: "amber",
+      subtitle:
+        "Access assigned work orders, check unit specifications, track completion milestones, and view disbursement records.",
     },
     owner: {
-      badge: "Owner / Investor Guide",
+      badge: "Owner & Investor Guide",
       title: "The Curve — Owner & Investor Dashboard Manual",
-      subtitle: "Monitor real-time project progress, review unit inspection photos, track financial disbursements, and download milestone summaries.",
-      color: "purple",
+      subtitle:
+        "Monitor real-time project progress, review unit inspection photos, track financial disbursements, and download milestone summaries.",
     },
   }[role];
 
@@ -83,7 +86,7 @@ export default function UserManualModal({
         onClick={() => setIsOpen(true)}
         className={
           className ||
-          "px-3.5 py-2 rounded-xl bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all border border-slate-700 min-h-[40px]"
+          "px-3.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all border border-slate-700 min-h-[38px] cursor-pointer"
         }
       >
         <BookOpen className="w-4 h-4 text-blue-400" />
@@ -104,7 +107,7 @@ export default function UserManualModal({
                     <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
                       {roleConfig.badge}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">v1.2</span>
+                    <span className="text-xs text-slate-400 font-mono">v2.0</span>
                   </div>
                   <h2 className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
                     {roleConfig.title}
@@ -135,7 +138,7 @@ export default function UserManualModal({
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors"
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -154,14 +157,18 @@ export default function UserManualModal({
                     key={sec.id}
                     type="button"
                     onClick={() => setSelectedSection(sec.id)}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all ${
+                    className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
                       selectedSection === sec.id
-                        ? "bg-blue-600 text-white shadow-sm"
+                        ? "bg-blue-600 text-white shadow-xs"
                         : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     }`}
                   >
                     <span className="truncate">{sec.title}</span>
-                    <ArrowRight className={`w-3.5 h-3.5 shrink-0 ${selectedSection === sec.id ? "opacity-100" : "opacity-0"}`} />
+                    <ArrowRight
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        selectedSection === sec.id ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
                   </button>
                 ))}
               </div>
@@ -179,6 +186,38 @@ export default function UserManualModal({
                       </p>
                     </div>
 
+                    {/* Screenshot if available in section */}
+                    {filteredSections.find((s) => s.id === selectedSection)?.image && (
+                      <div className="space-y-1.5">
+                        <div
+                          className="relative group rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 shadow-xs cursor-pointer"
+                          onClick={() =>
+                            setLightboxImage(
+                              filteredSections.find((s) => s.id === selectedSection)?.image
+                                ?.src || null
+                            )
+                          }
+                        >
+                          <img
+                            src={
+                              filteredSections.find((s) => s.id === selectedSection)?.image
+                                ?.src
+                            }
+                            alt="Guide Screenshot"
+                            className="w-full h-auto object-cover max-h-[300px]"
+                          />
+                          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span className="px-3 py-1 rounded-full bg-white/90 text-xs font-bold text-slate-900 flex items-center gap-1">
+                              <Eye className="w-3.5 h-3.5" /> Enlarge
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-slate-400 italic text-center">
+                          {filteredSections.find((s) => s.id === selectedSection)?.image?.caption}
+                        </p>
+                      </div>
+                    )}
+
                     <div className="prose prose-slate prose-xs max-w-none text-slate-700 space-y-4">
                       {filteredSections.find((s) => s.id === selectedSection)?.renderedContent}
                     </div>
@@ -187,7 +226,9 @@ export default function UserManualModal({
                   <div className="text-center py-12 space-y-3">
                     <Search className="w-8 h-8 text-slate-300 mx-auto" />
                     <p className="text-sm font-semibold text-slate-700">No matching topics found</p>
-                    <p className="text-xs text-slate-500">Try searching for a different keyword like "add activity", "progress", "payment", or "password".</p>
+                    <p className="text-xs text-slate-500">
+                      Try searching for keywords like "provision", "progress", "payment", or "password".
+                    </p>
                   </div>
                 )}
               </div>
@@ -196,17 +237,36 @@ export default function UserManualModal({
             {/* Footer */}
             <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
               <div className="flex items-center gap-1.5 text-slate-600">
-                <ShieldAlert className="w-4 h-4 text-slate-400" />
-                <span>Security Notice: All deletions require your account password.</span>
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>The Curve Real Estate Work Management System</span>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold rounded-xl transition-colors"
+                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold rounded-xl transition-colors cursor-pointer"
               >
                 Close Manual
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Screenshot Lightbox */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-60 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div className="relative max-w-4xl w-full">
+            <img
+              src={lightboxImage}
+              alt="Screenshot Preview"
+              className="max-w-full max-h-[85vh] mx-auto rounded-2xl shadow-2xl border border-white/20"
+            />
+            <p className="text-white text-xs text-center mt-3 bg-black/60 px-4 py-1 rounded-full w-max mx-auto">
+              Click anywhere to close
+            </p>
           </div>
         </div>
       )}
@@ -224,6 +284,10 @@ interface Section {
   description?: string;
   content: string;
   keywords?: string[];
+  image?: {
+    src: string;
+    caption: string;
+  };
   renderedContent: React.ReactNode;
 }
 
@@ -232,122 +296,72 @@ function getRoleSections(role: UserRoleType): Section[] {
     return [
       {
         id: "overview",
-        title: "1. System Overview & Hierarchy",
-        description: "Core real estate architecture and role boundaries",
-        keywords: ["admin", "hierarchy", "structure", "overview"],
-        content: "Project structure includes Projects, Blocks/Towers, Units, and Unit Activities.",
+        title: "1. Work Activities & Disbursement Console",
+        description: "Direct activity status oversight and milestone payments",
+        keywords: ["admin", "console", "payments", "activities", "overview"],
+        content: "Select Project, Block, Unit and record direct contractor milestone disbursements.",
+        image: {
+          src: "/manual/admin_console_guide.jpg",
+          caption: "Admin Work Activities & Payment Console with unit filtering, status, and disbursement controls.",
+        },
         renderedContent: (
           <div className="space-y-4 text-xs sm:text-sm">
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-blue-900 space-y-2">
-              <p className="font-semibold text-blue-950">Structural Hierarchy:</p>
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-center text-xs font-semibold">
-                <div className="bg-white p-2.5 rounded-xl border border-blue-200 shadow-xs">
-                  <Building2 className="w-4 h-4 mx-auto text-blue-600 mb-1" />
-                  <span>1. Project</span>
-                </div>
-                <div className="bg-white p-2.5 rounded-xl border border-blue-200 shadow-xs">
-                  <Layers className="w-4 h-4 mx-auto text-blue-600 mb-1" />
-                  <span>2. Block / Tower</span>
-                </div>
-                <div className="bg-white p-2.5 rounded-xl border border-blue-200 shadow-xs">
-                  <Building2 className="w-4 h-4 mx-auto text-blue-600 mb-1" />
-                  <span>3. Unit / Flat</span>
-                </div>
-                <div className="bg-white p-2.5 rounded-xl border border-blue-200 shadow-xs">
-                  <Sparkles className="w-4 h-4 mx-auto text-blue-600 mb-1" />
-                  <span>4. Unit Activity</span>
-                </div>
-              </div>
-            </div>
             <p>
-              As an <strong>Administrator</strong>, you have full CRUD authority over the entire organization. You can create projects, configure structural blocks, generate units, manage the master catalog of construction tasks, disburse payments, and audit all platform actions.
+              The <strong>Work Activities &amp; Payment Console</strong> is the primary operational hub on your Administrator Dashboard.
             </p>
+            <ol className="list-decimal list-inside space-y-2 text-slate-700 font-medium">
+              <li><strong>Select Unit:</strong> Pick Project, Block/Tower, and Unit Number from the top dropdowns.</li>
+              <li><strong>Check Progress:</strong> View progress % bars and status badges (Pending, In Progress, Completed).</li>
+              <li><strong>Assign Contractor:</strong> Click <em>+ Assign Contractor</em> to bind trade agencies to unassigned tasks.</li>
+              <li><strong>Record Payment:</strong> Click <em>Record Payment</em> to disburse funds. The dialog auto-locks to the task and contractor.</li>
+            </ol>
           </div>
         ),
       },
       {
         id: "projects-blocks-units",
-        title: "2. Projects, Blocks & Units Setup",
-        description: "Creating and structuring real estate developments",
-        keywords: ["create project", "block", "unit", "floor", "area"],
-        content: "How to add projects, towers, floors, and individual units.",
+        title: "2. Projects, Blocks & Team Allocations",
+        description: "Creating hierarchy and assigning field supervisors",
+        keywords: ["create project", "block", "unit", "team", "engineer", "contractor"],
+        content: "Structure development towers, units, and link Site Engineers and Contractors.",
+        image: {
+          src: "/manual/team_hierarchy_guide.jpg",
+          caption: "Project Configuration showing Towers/Blocks inventory and Team Allocation.",
+        },
         renderedContent: (
           <div className="space-y-4 text-xs sm:text-sm">
-            <ol className="list-decimal list-inside space-y-3 font-medium text-slate-700">
-              <li>
-                <strong>Create Project:</strong> Navigate to <code>/admin/projects</code>, click <strong>"New Project"</strong>, and enter the name, location, and initial status.
-              </li>
-              <li>
-                <strong>Add Blocks / Towers:</strong> Open the created project, click <strong>"Add Block"</strong>, name the tower (e.g. <em>Tower A</em>), and set its sort order.
-              </li>
-              <li>
-                <strong>Add Units:</strong> Open a block, click <strong>"Add Unit"</strong>, specify the unit number (e.g. <em>101</em>), floor, unit type (e.g. <em>3 BHK</em>), area in sq.ft, and status.
-              </li>
+            <ol className="list-decimal list-inside space-y-2 font-medium text-slate-700">
+              <li>Navigate to <code>/admin/projects</code> and create your development project.</li>
+              <li>Add <strong>Blocks/Towers</strong> (e.g., Tower A) and configure <strong>Units</strong> (floor, area sq.ft, flat type).</li>
+              <li>Under <strong>Manage Team</strong>, assign Site Engineers, Trade Contractors (with company agency names), and Project Owners.</li>
             </ol>
           </div>
         ),
       },
       {
-        id: "activity-master",
-        title: "3. Master Activity Catalog",
-        description: "Standardizing construction milestones and rates",
-        keywords: ["activity master", "catalog", "standard", "rcc", "foundation"],
-        content: "Configure standard activity templates with codes, categories, and units of measurement.",
+        id: "reports-exports",
+        title: "3. Reports & Financial Exports",
+        description: "Exporting ledgers, vouchers, and downloading PDF/CSV files",
+        keywords: ["reports", "export", "csv", "pdf", "financials"],
+        content: "Generate contractor payment vouchers, audit summaries, and export CSV/PDF reports.",
+        image: {
+          src: "/manual/reports_export_guide.jpg",
+          caption: "Reports and Exports ledger with filter options and PDF/CSV download buttons.",
+        },
         renderedContent: (
           <div className="space-y-4 text-xs sm:text-sm">
-            <p>
-              The <strong>Activity Master</strong> catalog defines standard construction tasks (e.g. Foundation, RCC, Brick Work, Plaster, MEP, Flooring, Painting).
-            </p>
+            <p>Under <code>/admin/reports</code>:</p>
             <ul className="list-disc list-inside space-y-2 text-slate-700">
-              <li>Go to <code>/admin/activity-master</code> to add or configure templates.</li>
-              <li>Setting an activity to <em>Active</em> makes it immediately available in unit provisioning checklists.</li>
-              <li>Changes to the master catalog do not alter existing unit activity records, ensuring total independence.</li>
-            </ul>
-          </div>
-        ),
-      },
-      {
-        id: "team-allocation",
-        title: "4. Team & Contractor Allocations",
-        description: "Granting role-scoped access to engineers, contractors, and owners",
-        keywords: ["team", "assign", "contractor", "engineer", "owner"],
-        content: "Link users to projects to grant them visibility and task execution rights.",
-        renderedContent: (
-          <div className="space-y-4 text-xs sm:text-sm">
-            <p>
-              Users only see data for projects they are assigned to. To allocate team members:
-            </p>
-            <ol className="list-decimal list-inside space-y-2 text-slate-700 font-medium">
-              <li>Open any Project in the Admin dashboard.</li>
-              <li>Click <strong>"Manage Team"</strong> in the top header.</li>
-              <li>Switch between <em>Employees</em>, <em>Contractors</em>, or <em>Owners</em> tabs to link personnel.</li>
-              <li>For Contractors, assign their trade / company agency name (e.g. <em>Apex Electricals</em>).</li>
-            </ol>
-          </div>
-        ),
-      },
-      {
-        id: "payments-finances",
-        title: "5. Payments & Financial Management",
-        description: "Disbursing contractor funds and tracking remaining balances",
-        keywords: ["payment", "disbursement", "finance", "cost", "budget"],
-        content: "Record milestone disbursements, select payment methods, and monitor automatic balance calculations.",
-        renderedContent: (
-          <div className="space-y-4 text-xs sm:text-sm">
-            <p>
-              Track payments per project or linked directly to specific unit activities:
-            </p>
-            <ul className="list-disc list-inside space-y-2 text-slate-700">
-              <li>Click <strong>"Record Payment"</strong> on the project dashboard or payments tab.</li>
-              <li>Enter the amount paid, contractor/vendor name, payment mode (NEFT/Cheque/UPI/Cash), and reference note.</li>
-              <li>Financial balances (<code>Total Estimated Budget - Total Paid = Remaining Balance</code>) recalculate automatically in real-time.</li>
+              <li>Filter payment vouchers by Project and Date Range (Last 30 Days, Last 90 Days, All Time).</li>
+              <li>Inspect <strong>Total Budget</strong>, <strong>Disbursed Funds</strong>, and <strong>Remaining Balance</strong>.</li>
+              <li>Click <strong>Export CSV</strong> for spreadsheets or <strong>Download PDF Report</strong> for print-ready vouchers.</li>
             </ul>
           </div>
         ),
       },
       {
         id: "security-deletions",
-        title: "6. Security & Password Protected Deletions",
+        title: "4. Security & Password Protected Deletions",
         description: "Preventing accidental data loss with mandatory authentication",
         keywords: ["password", "delete", "security", "protect", "audit"],
         content: "All delete actions require your account password. Full audit logs record every sensitive mutation.",
@@ -358,12 +372,12 @@ function getRoleSections(role: UserRoleType): Section[] {
               <div>
                 <p className="font-bold text-red-950">Mandatory Password Confirmation</p>
                 <p className="mt-0.5">
-                  To prevent accidental loss of structural project data, deleting any project, block, unit, activity, payment, or team assignment strictly requires entering your login password.
+                  Deleting any project, tower, unit, activity, payment, or user account strictly requires entering your administrator password.
                 </p>
               </div>
             </div>
             <p>
-              All events (updates, deletions, assignments) are permanently recorded in the <strong>Audit Logs</strong> (<code>/admin/audit-logs</code>) with timestamp, actor profile, and delta changes.
+              All mutations are recorded permanently in the <strong>Audit Logs</strong> (<code>/admin/audit-logs</code>).
             </p>
           </div>
         ),
@@ -375,29 +389,24 @@ function getRoleSections(role: UserRoleType): Section[] {
     return [
       {
         id: "overview",
-        title: "1. Site Engineer Workspace Overview",
-        description: "Your daily hub for unit inspections and activity management",
-        keywords: ["engineer", "employee", "overview", "site"],
-        content: "Site Engineers have operational authority to provision activities, allocate contractors, and submit verified inspection progress.",
+        title: "1. Site Engineer Field Operations",
+        description: "Daily workflow for unit checklists and physical inspections",
+        keywords: ["engineer", "employee", "overview", "site", "inspection"],
+        content: "Site Engineers supervise unit construction, verify milestone completion, and upload site photos.",
+        image: {
+          src: "/manual/site_inspection_guide.jpg",
+          caption: "Site Engineer Inspection dialog with 0-100% progress slider, milestone buttons, and verified photos.",
+        },
         renderedContent: (
           <div className="space-y-4 text-xs sm:text-sm">
-            <p>
-              Welcome to the <strong>Site Engineer Dashboard</strong>. As an engineer or site supervisor:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                <span className="text-xs font-bold text-slate-900">1. Provision Activities</span>
-                <p className="text-xs text-slate-500">Set up standard and custom work checklists for every unit.</p>
-              </div>
-              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                <span className="text-xs font-bold text-slate-900">2. Assign Contractors</span>
-                <p className="text-xs text-slate-500">Link trade contractors to specific unit activities.</p>
-              </div>
-              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
-                <span className="text-xs font-bold text-slate-900">3. Site Inspections</span>
-                <p className="text-xs text-slate-500">Submit verified progress % reports with photo evidence.</p>
-              </div>
-            </div>
+            <p>As a <strong>Site Engineer</strong>, you supervise physical construction on site:</p>
+            <ol className="list-decimal list-inside space-y-2 text-slate-700 font-medium">
+              <li>Open your assigned project from the Site Engineer dashboard.</li>
+              <li>Select any Unit to open its active work checklist.</li>
+              <li>Click <strong>Record Inspection</strong> on any task to adjust the verified progress percentage (0-100%).</li>
+              <li>Upload live camera photos from the job site and add physical verification notes.</li>
+              <li>Submit the inspection to synchronize with the Admin and Owner portals.</li>
+            </ol>
           </div>
         ),
       },
@@ -408,27 +417,24 @@ function getRoleSections(role: UserRoleType): Section[] {
         keywords: ["provision", "template", "copy", "custom", "add activity"],
         content: "Use Single Custom Activity, Batch Template Checklist, or Copy From Another Unit.",
         renderedContent: (
-          <div className="space-y-4 text-xs sm:text-sm">
-            <p>When you open any unit, click <strong>"Provision Activities"</strong>. You can choose from 3 modes:</p>
-            <div className="space-y-3 font-medium text-slate-700">
-              <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl">
-                <p className="font-bold text-blue-900">Mode A: Single / Custom Activity</p>
-                <p className="text-xs text-blue-800 mt-1">
-                  Select an activity from the searchable dropdown or type a brand new custom activity name. Set estimated cost and unit-specific notes.
-                </p>
-              </div>
-              <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl">
-                <p className="font-bold text-emerald-900">Mode B: Batch from Master Templates</p>
-                <p className="text-xs text-emerald-800 mt-1">
-                  Check off multiple activities at once (e.g. Foundation, RCC, Brick Work, Flooring) and optionally set estimated budgets in bulk.
-                </p>
-              </div>
-              <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl">
-                <p className="font-bold text-amber-900">Mode C: Copy From Another Unit (Clone)</p>
-                <p className="text-xs text-amber-800 mt-1">
-                  Clone all activities and estimated rates from another completed/configured unit in the project with a single click.
-                </p>
-              </div>
+          <div className="space-y-3 text-xs sm:text-sm font-medium text-slate-700">
+            <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl">
+              <p className="font-bold text-blue-900">Mode A: Single Custom Activity</p>
+              <p className="text-xs text-blue-800 mt-1">
+                Type a custom task name, set estimated cost and specific floor notes.
+              </p>
+            </div>
+            <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl">
+              <p className="font-bold text-emerald-900">Mode B: Batch from Master Templates</p>
+              <p className="text-xs text-emerald-800 mt-1">
+                Check off multiple master activities (RCC, Plaster, MEP, Tiling) and batch provision them at once.
+              </p>
+            </div>
+            <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl">
+              <p className="font-bold text-amber-900">Mode C: Copy From Another Unit (Clone)</p>
+              <p className="text-xs text-amber-800 mt-1">
+                Clone all activities and estimated rates from another completed or configured unit in the project.
+              </p>
             </div>
           </div>
         ),
@@ -441,31 +447,9 @@ function getRoleSections(role: UserRoleType): Section[] {
         content: "Use the Contractor dropdown on any activity row to assign or change the executing contractor.",
         renderedContent: (
           <div className="space-y-4 text-xs sm:text-sm">
-            <ol className="list-decimal list-inside space-y-2 text-slate-700 font-medium">
-              <li>Open the Unit Activity List.</li>
-              <li>Locate the activity (e.g. <em>Electrical Work</em>).</li>
-              <li>Select the contractor company from the dropdown menu (e.g. <em>Apex Electricals</em>).</li>
-              <li>The contractor will immediately see this task listed under their <strong>"My Work"</strong> portal.</li>
-            </ol>
-          </div>
-        ),
-      },
-      {
-        id: "inspection-reports",
-        title: "4. Conducting Inspections & Photo Verification",
-        description: "Recording on-site progress with verified camera photos",
-        keywords: ["inspection", "photo", "camera", "progress", "verify"],
-        content: "Click Record Inspection on any activity, adjust the progress slider (0-100%), add site notes, and upload verification photos.",
-        renderedContent: (
-          <div className="space-y-4 text-xs sm:text-sm">
-            <p>To record verified site progress:</p>
-            <ol className="list-decimal list-inside space-y-2 text-slate-700 font-medium">
-              <li>Click <strong>"Record Inspection"</strong> on the target activity.</li>
-              <li>Adjust the progress slider (e.g. <em>75%</em>) or click quick milestone buttons.</li>
-              <li>Status auto-synchronizes (<code>0% = Pending</code>, <code>1-99% = In Progress</code>, <code>100% = Completed</code>).</li>
-              <li>Add mobile photos from the job site to build a permanent verifiable timeline.</li>
-              <li>Click <strong>"Submit Inspection Report"</strong>.</li>
-            </ol>
+            <p>
+              Select the contractor agency from the dropdown on any unit activity row. Assigned tasks immediately appear in the contractor's personal portal.
+            </p>
           </div>
         ),
       },
@@ -483,33 +467,31 @@ function getRoleSections(role: UserRoleType): Section[] {
         renderedContent: (
           <div className="space-y-4 text-xs sm:text-sm">
             <p>
-              Welcome to the <strong>Contractor Portal</strong>. This portal provides a focused, real-time list of all tasks assigned to your company.
+              Welcome to the <strong>Contractor Portal</strong>. Sign in with your mobile number to view:
             </p>
             <ul className="list-disc list-inside space-y-2 text-slate-700">
-              <li>Tasks are grouped by Project, Block, and Unit number.</li>
-              <li>View unit specifications, scope of work, and current milestone completion %.</li>
-              <li>Access site inspection verification records submitted by the Site Engineer.</li>
+              <li>Assigned tasks grouped by Project, Tower, and Unit.</li>
+              <li>Unit technical specifications and milestone target dates.</li>
+              <li>Official milestone completion percentages verified by Site Engineers.</li>
+              <li>Payment disbursement history released to your agency.</li>
             </ul>
           </div>
         ),
       },
       {
         id: "inspection-process",
-        title: "2. Inspection & Verification Protocol",
+        title: "2. Inspection & Sign-off Protocol",
         description: "How completed work is reviewed and signed off",
         keywords: ["inspection", "sign off", "engineer", "verification"],
-        content: "When work on site is completed, notify the Site Engineer to conduct an inspection and record progress.",
+        content: "When work on site is completed, notify the Site Engineer to conduct an inspection.",
         renderedContent: (
           <div className="space-y-4 text-xs sm:text-sm">
             <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs space-y-1">
               <p className="font-bold">Engineer Verification Requirement</p>
               <p>
-                To maintain audit compliance, inspection reports and progress updates are officially verified and signed off by the Site Engineer upon on-site review.
+                To maintain audit compliance, inspection reports and progress updates are officially verified and signed off by the Site Engineer on site before payment release.
               </p>
             </div>
-            <p>
-              Once the engineer submits the inspection, your dashboard will immediately reflect the updated completion percentage, status, and attached photo evidence.
-            </p>
           </div>
         ),
       },
@@ -520,27 +502,31 @@ function getRoleSections(role: UserRoleType): Section[] {
   return [
     {
       id: "overview",
-      title: "1. Owner & Investor Dashboard Overview",
+      title: "1. Owner & Investor Dashboard",
       description: "Transparency into construction progress and financials",
       keywords: ["owner", "investor", "progress", "financials"],
-      content: "Owners have comprehensive read-only transparency into project milestones, inspection photos, and financial payment records.",
+      content: "Owners have comprehensive real-time transparency into project milestones, inspection photos, and financial payment records.",
+      image: {
+        src: "/manual/reports_export_guide.jpg",
+        caption: "Owner financial portfolio and disbursement tracking overview.",
+      },
       renderedContent: (
         <div className="space-y-4 text-xs sm:text-sm">
           <p>
-            Welcome to the <strong>Owner &amp; Investor Portal</strong>. This view offers executive transparency into your real estate investments:
+            Welcome to the <strong>Owner &amp; Investor Portal</strong>. Monitor your real estate assets in real-time:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-3.5 bg-purple-50 border border-purple-200 rounded-xl space-y-1">
-              <p className="text-xs font-bold text-purple-950">Overall Project Completion</p>
-              <p className="text-xs text-purple-800">Aggregated real-time progress across all blocks and units.</p>
+            <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl space-y-1">
+              <p className="text-xs font-bold text-blue-950">Overall Completion</p>
+              <p className="text-xs text-blue-800">Real-time aggregate progress across all blocks and units.</p>
             </div>
-            <div className="p-3.5 bg-purple-50 border border-purple-200 rounded-xl space-y-1">
-              <p className="text-xs font-bold text-purple-950">Financial Health</p>
-              <p className="text-xs text-purple-800">Total estimated costs, funds disbursed, and remaining balances.</p>
+            <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-1">
+              <p className="text-xs font-bold text-emerald-950">Financial Balances</p>
+              <p className="text-xs text-emerald-800">Total budget, funds disbursed, and remaining dues.</p>
             </div>
             <div className="p-3.5 bg-purple-50 border border-purple-200 rounded-xl space-y-1">
               <p className="text-xs font-bold text-purple-950">Photo Evidence Timeline</p>
-              <p className="text-xs text-purple-800">Time-stamped inspection photos directly from the job site.</p>
+              <p className="text-xs text-purple-800">Time-stamped inspection photos directly from the field.</p>
             </div>
           </div>
         </div>
@@ -548,34 +534,17 @@ function getRoleSections(role: UserRoleType): Section[] {
     },
     {
       id: "financial-tracking",
-      title: "2. Tracking Financial Disbursements",
+      title: "2. Financial Disbursement Tracking",
       description: "Reviewing payment records and milestone balances",
       keywords: ["finances", "payments", "balance", "cost", "budget"],
       content: "Review all payments disbursed to contractors and vendors with full reference numbers.",
       renderedContent: (
         <div className="space-y-4 text-xs sm:text-sm">
-          <p>
-            Under the <strong>Financial Summary</strong> card on your dashboard:
-          </p>
           <ul className="list-disc list-inside space-y-2 text-slate-700">
             <li><strong>Total Estimated Budget:</strong> Sum of all unit activity estimates for your project.</li>
             <li><strong>Total Paid:</strong> Cumulative disbursements released to contractors.</li>
             <li><strong>Remaining Balance:</strong> Funds remaining to be disbursed against pending milestones.</li>
           </ul>
-        </div>
-      ),
-    },
-    {
-      id: "photo-timeline",
-      title: "3. Site Photo Timeline & Inspection Logs",
-      description: "Visual evidence of on-site milestone completion",
-      keywords: ["photos", "gallery", "inspections", "timeline"],
-      content: "Inspect high-resolution site photos uploaded by Site Engineers during milestone reviews.",
-      renderedContent: (
-        <div className="space-y-4 text-xs sm:text-sm">
-          <p>
-            Every inspection report filed by the Site Engineer includes time-stamped visual verification photos. You can click any photo in the project timeline to view high-resolution inspection details.
-          </p>
         </div>
       ),
     },
