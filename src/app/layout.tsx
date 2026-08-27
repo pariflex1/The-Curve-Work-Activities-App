@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Lato } from "next/font/google";
+import { Roboto } from "next/font/google";
 import "./globals.css";
 import NavigationLoader from "@/components/NavigationLoader";
 
-const lato = Lato({
-  weight: ["100", "300", "400", "700", "900"],
+const roboto = Roboto({
+  weight: ["300", "400", "500", "700", "900"],
   subsets: ["latin"],
-  variable: "--font-lato",
+  variable: "--font-roboto",
   display: "swap",
 });
 
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#f8f9fc",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -44,7 +44,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${lato.variable} h-full antialiased font-sans`}>
+    <html lang="en" className={`${roboto.variable} h-full antialiased font-sans`}>
       <head>
         <script
           dangerouslySetInnerHTML={{
