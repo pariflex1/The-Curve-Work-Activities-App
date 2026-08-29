@@ -147,7 +147,7 @@ export default function ProgressForm({
             step="5"
             value={newProgress}
             onChange={(e) => setNewProgress(parseInt(e.target.value, 10))}
-            className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#FF7903]"
           />
 
           <div className="flex justify-between text-xs text-slate-400 font-mono">
@@ -168,7 +168,7 @@ export default function ProgressForm({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Describe what specific work was finished (e.g. Completed brick masonry for east-facing wall, cured for 48 hrs)..."
-            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
+            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF7903] focus:bg-white text-base sm:text-sm"
           />
         </div>
 
@@ -182,7 +182,7 @@ export default function ProgressForm({
             value={remarks}
             onChange={(e) => setRemarks(e.target.value)}
             placeholder="e.g. Material delivery pending for next milestone"
-            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm"
+            className="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF7903] focus:bg-white text-base sm:text-sm"
           />
         </div>
 
@@ -241,7 +241,7 @@ export default function ProgressForm({
         <button
           type="submit"
           disabled={loading || !note.trim()}
-          className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center justify-center gap-2 text-sm shadow-sm transition-all disabled:opacity-50 min-h-[44px] cursor-pointer"
+          className="w-full py-3 px-4 rounded-xl bg-[#FF7903] hover:bg-[#e66a00] text-white font-bold flex items-center justify-center gap-2 text-sm shadow-sm shadow-[#FF7903]/20 transition-all disabled:opacity-50 min-h-[44px] cursor-pointer"
         >
           {loading ? (
             <span>{uploadProgressText || "Submitting..."}</span>

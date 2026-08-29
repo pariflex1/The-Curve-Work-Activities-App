@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
               </p>
               <Link
                 href="/login"
-                className="inline-block mt-4 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-semibold hover:bg-blue-700 transition-colors"
+                className="inline-block mt-4 px-6 py-2.5 bg-[#FF7903] hover:bg-[#e66a00] text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-[#FF7903]/20 transition-colors"
               >
                 Return to Sign In
               </Link>
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
                     name="email"
                     type="email"
                     required
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white text-base sm:text-sm transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF7903] focus:bg-white text-base sm:text-sm transition-all"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition-all flex items-center justify-center gap-2 min-h-[44px] disabled:opacity-50 text-sm mt-2"
+                className="w-full py-3 px-4 rounded-xl bg-[#FF7903] hover:bg-[#e66a00] text-white font-semibold shadow-md shadow-[#FF7903]/20 transition-all flex items-center justify-center gap-2 min-h-[44px] disabled:opacity-50 text-sm mt-2 cursor-pointer"
               >
                 <span>{loading ? "Sending..." : "Send Reset Link"}</span>
                 {!loading && <ArrowRight className="w-4 h-4" />}

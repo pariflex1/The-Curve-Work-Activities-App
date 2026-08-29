@@ -425,16 +425,16 @@ export default function ReportsView({
           <button
             type="button"
             onClick={handleExportCSV}
-            className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all shadow-2xs border border-slate-200 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-[#FFE5CC] hover:bg-[#FF7903] text-[#933D00] hover:text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all shadow-2xs border border-[#FFD4AA] cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-slate-700" />
+            <Download className="w-3.5 h-3.5" />
             <span>CSV</span>
           </button>
 
           <button
             type="button"
             onClick={handlePrint}
-            className="px-4 py-2 rounded-xl bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-[#FF7903] hover:bg-[#e66a00] text-white text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all shadow-sm shadow-[#FF7903]/20 cursor-pointer"
           >
             <Printer className="w-3.5 h-3.5" />
             <span>Print / PDF</span>
@@ -458,16 +458,16 @@ export default function ReportsView({
               onClick={() => setReportType(tab.id)}
               className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
                 isSelected
-                  ? "bg-black text-white border-black shadow-md ring-2 ring-slate-900/10"
-                  : "bg-white hover:bg-slate-50 border-slate-200 text-slate-900 shadow-2xs"
+                  ? "bg-[#FF7903] text-white border-[#FF7903] shadow-md shadow-[#FF7903]/20"
+                  : "bg-white hover:bg-[#FFE5CC]/30 border-slate-200 text-slate-900 shadow-2xs"
               }`}
             >
               <div className="flex items-center justify-between mb-1.5">
-                <Icon className={`w-5 h-5 ${isSelected ? "text-white" : "text-slate-700"}`} />
-                {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                <Icon className={`w-5 h-5 ${isSelected ? "text-white" : "text-[#FF7903]"}`} />
+                {isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
               </div>
               <p className="font-bold text-xs sm:text-sm">{tab.label}</p>
-              <p className={`text-[11px] mt-0.5 ${isSelected ? "text-slate-300" : "text-slate-500"}`}>{tab.desc}</p>
+              <p className={`text-[11px] mt-0.5 ${isSelected ? "text-white/80" : "text-slate-500"}`}>{tab.desc}</p>
             </button>
           );
         })}

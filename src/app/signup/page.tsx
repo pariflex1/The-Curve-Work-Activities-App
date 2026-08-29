@@ -43,7 +43,7 @@ export default function SignupPage() {
           <div className="pt-2">
             <Link
               href="/login"
-              className="w-full py-3 px-4 rounded-xl bg-black hover:bg-slate-800 text-white font-bold shadow-sm transition-all flex items-center justify-center gap-2 min-h-[46px] text-sm"
+              className="w-full py-3 px-4 rounded-xl bg-[#FF7903] hover:bg-[#e66a00] text-white font-bold shadow-md shadow-[#FF7903]/20 transition-all flex items-center justify-center gap-2 min-h-[46px] text-sm cursor-pointer"
             >
               <span>Go to Sign In</span>
               <ArrowRight className="w-4 h-4" />

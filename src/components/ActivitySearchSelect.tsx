@@ -247,14 +247,14 @@ export default function ActivitySearchSelect({
                         onClick={() => handleSelectOption(opt)}
                         className={`p-2.5 rounded-xl cursor-pointer flex items-center justify-between gap-3 transition-colors ${
                           isSelected
-                            ? "bg-blue-50 text-blue-900 font-semibold"
+                            ? "bg-[#FFE5CC] text-[#933D00] font-semibold"
                             : "hover:bg-slate-100 text-slate-800"
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div
                             className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs shrink-0 ${
-                              isSelected ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-600"
+                              isSelected ? "bg-[#FF7903] text-white" : "bg-slate-200 text-slate-600"
                             }`}
                           >
                             {isSelected ? <Check className="w-3.5 h-3.5" /> : <Tag className="w-3 h-3" />}

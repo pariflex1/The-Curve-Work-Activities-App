@@ -72,7 +72,7 @@ function NavigationLoaderInner() {
       {/* Top Global Progress Loading Bar */}
       <div className="fixed top-0 left-0 right-0 z-[99999] h-1.5 bg-slate-200/50 pointer-events-none">
         <div
-          className="h-full bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-400 transition-all duration-200 ease-out shadow-[0_0_12px_rgba(59,130,246,0.9)]"
+          className="h-full bg-gradient-to-r from-[#FF7903] via-[#ff9436] to-[#FFE5CC] transition-all duration-200 ease-out shadow-[0_0_12px_rgba(255,121,3,0.9)]"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -80,7 +80,7 @@ function NavigationLoaderInner() {
       {/* Floating Corner Loading Badge */}
       {isLoading && (
         <div className="fixed bottom-5 right-5 z-[99999] bg-slate-900/90 text-white backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-2xl border border-slate-700/50 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
-          <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center animate-spin">
+          <div className="w-6 h-6 rounded-lg bg-[#FF7903] flex items-center justify-center animate-spin">
             <Building2 className="w-3.5 h-3.5 text-white" />
           </div>
           <span className="text-xs font-bold tracking-wide">Loading...</span>

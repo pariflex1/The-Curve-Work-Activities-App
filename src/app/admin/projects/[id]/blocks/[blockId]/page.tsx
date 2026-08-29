@@ -137,7 +137,7 @@ export default async function BlockDetailPage({ params }: BlockDetailPageProps) 
                   <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
                     <Link
                       href={`/admin/projects/${projectId}/blocks/${blockId}/units/${unit.id}`}
-                      className="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-600 hover:text-white text-xs font-semibold flex items-center gap-1 transition-all min-h-[36px]"
+                      className="px-3 py-1.5 rounded-lg bg-[#FFE5CC] border border-[#FFD4AA] text-[#933D00] hover:bg-[#FF7903] hover:text-white text-xs font-semibold flex items-center gap-1 transition-all min-h-[36px] cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Activities</span>

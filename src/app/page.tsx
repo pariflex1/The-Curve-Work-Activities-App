@@ -89,7 +89,7 @@ export default async function Home() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <PWAInstallButton className="py-2 px-4 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-medium border border-blue-200/60 transition-all android-ripple" />
+            <PWAInstallButton className="py-2 px-4 rounded-full bg-[#FFE5CC] hover:bg-[#ffd9b3] text-[#933D00] text-xs font-medium border border-[#FFD4AA] transition-all android-ripple" />
             {user ? (
               <div className="flex items-center gap-2 sm:gap-3">
                 <Link
@@ -102,7 +102,7 @@ export default async function Home() {
                       ? "/contractor"
                       : "/owner"
                   }
-                  className="px-4 sm:px-5 py-2 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-medium rounded-full shadow-xs transition-all flex items-center gap-2 min-h-[38px] sm:min-h-[42px] android-ripple"
+                  className="px-4 sm:px-5 py-2 sm:py-2.5 bg-[#FF7903] hover:bg-[#e66a00] text-white text-xs sm:text-sm font-medium rounded-full shadow-md shadow-[#FF7903]/20 transition-all flex items-center gap-2 min-h-[38px] sm:min-h-[42px] android-ripple"
                 >
                   <span>Dashboard</span>
                   <ArrowRight className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
@@ -112,7 +112,7 @@ export default async function Home() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="px-5 sm:px-6 py-2 sm:py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-medium rounded-full shadow-xs transition-all min-h-[38px] sm:min-h-[42px] flex items-center android-ripple"
+                  className="px-5 sm:px-6 py-2 sm:py-2.5 bg-[#FF7903] hover:bg-[#e66a00] text-white text-xs sm:text-sm font-medium rounded-full shadow-md shadow-[#FF7903]/20 transition-all min-h-[38px] sm:min-h-[42px] flex items-center android-ripple"
                 >
                   Sign In
                 </Link>

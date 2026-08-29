@@ -224,14 +224,107 @@ export async function deleteUnit(unitId: string, blockId: string, projectId: str
 // TEAM ASSIGNMENTS ACTIONS
 // ==========================================
 
-export async function assignEmployee(projectId: string, profileId: string) {
+export async function assignEmployee(
+  projectId: string,
+  profileId: string,
+  hierarchy?: {
+    accessLevel?: "full_project" | "block_level" | "unit_level";
+    blockIds?: string[];
+    unitIds?: string[];
+  }
+) {
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: newPE, error } = await supabase
     .from("project_employees")
-    .insert({ project_id: projectId, profile_id: profileId });
+    .insert({ project_id: projectId, profile_id: profileId })
+    .select("id")
+    .single();
 
   if (error) return { error: error.message };
+
+  // If hierarchy scope is specified or defaulted
+  const accessLevel = hierarchy?.accessLevel || "full_project";
+  const blockIds = hierarchy?.blockIds || [];
+  const unitIds = hierarchy?.unitIds || [];
+
+  const { data: { user } } = await supabase.auth.getUser();
+  let actorId = null;
+  if (user) {
+    const { data: p } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
+    actorId = p?.id;
+  }
+
+  // Record hierarchy configuration in audit_logs
+  await supabase.from("audit_logs").insert({
+    actor_profile_id: actorId,
+    action: "SET_HIERARCHY",
+    entity_type: "project_employees",
+    entity_id: newPE.id,
+    meta_json: {
+      access_level: accessLevel,
+      block_ids: blockIds,
+      unit_ids: unitIds,
+      project_id: projectId,
+      profile_id: profileId,
+    },
+  });
+
   revalidatePath(`/admin/projects/${projectId}`);
+  revalidatePath(`/employee`);
+  revalidatePath(`/employee/projects/${projectId}`);
+  return { success: true };
+}
+
+export async function updateEmployeeHierarchy(
+  projectId: string,
+  profileId: string,
+  hierarchy: {
+    accessLevel: "full_project" | "block_level" | "unit_level";
+    blockIds?: string[];
+    unitIds?: string[];
+  }
+) {
+  const supabase = await createClient();
+  
+  // Find project_employees record
+  const { data: pe, error: peErr } = await supabase
+    .from("project_employees")
+    .select("id")
+    .eq("project_id", projectId)
+    .eq("profile_id", profileId)
+    .single();
+
+  if (peErr || !pe) {
+    return { error: "Employee project assignment not found." };
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  let actorId = null;
+  if (user) {
+    const { data: p } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
+    actorId = p?.id;
+  }
+
+  // Save new hierarchy configuration
+  const { error: logErr } = await supabase.from("audit_logs").insert({
+    actor_profile_id: actorId,
+    action: "SET_HIERARCHY",
+    entity_type: "project_employees",
+    entity_id: pe.id,
+    meta_json: {
+      access_level: hierarchy.accessLevel || "full_project",
+      block_ids: hierarchy.blockIds || [],
+      unit_ids: hierarchy.unitIds || [],
+      project_id: projectId,
+      profile_id: profileId,
+    },
+  });
+
+  if (logErr) return { error: logErr.message };
+
+  revalidatePath(`/admin/projects/${projectId}`);
+  revalidatePath(`/employee`);
+  revalidatePath(`/employee/projects/${projectId}`);
   return { success: true };
 }
 
@@ -244,6 +337,8 @@ export async function removeEmployee(projectId: string, profileId: string) {
 
   if (error) return { error: error.message };
   revalidatePath(`/admin/projects/${projectId}`);
+  revalidatePath(`/employee`);
+  revalidatePath(`/employee/projects/${projectId}`);
   return { success: true };
 }
 

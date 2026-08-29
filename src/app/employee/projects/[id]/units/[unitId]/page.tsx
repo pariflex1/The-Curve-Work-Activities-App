@@ -6,6 +6,7 @@ import ContractorSelect from "./ContractorSelect";
 import ProvisionModal from "@/app/admin/projects/[id]/blocks/[blockId]/units/[unitId]/ProvisionModal";
 import ActivityEditModal from "@/components/ActivityEditModal";
 import InspectionReportModal from "@/components/InspectionReportModal";
+import { getEmployeeHierarchy, canAccessUnit } from "@/utils/hierarchy";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,12 @@ export default async function EmployeeUnitPage({ params }: EmployeeUnitPageProps
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
 
   // Fetch unit details
   const { data: unit } = await supabase
@@ -41,6 +48,12 @@ export default async function EmployeeUnitPage({ params }: EmployeeUnitPageProps
     .single();
 
   if (!unit) notFound();
+
+  // Validate hierarchy scope permission
+  const hierarchy = await getEmployeeHierarchy(supabase, projectId, profile?.id || "");
+  if (!canAccessUnit(unitId, unit.blocks?.id || "", hierarchy)) {
+    redirect(`/employee/projects/${projectId}`);
+  }
 
   // Fetch activities, contractors, active masters, and other units concurrently
   const [

@@ -125,7 +125,7 @@ export default function InspectionReportModal({
           setNewProgress(currentProgress);
           setIsOpen(true);
         }}
-        className="px-3 py-1.5 rounded-lg bg-black hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm min-h-[32px]"
+        className="px-3 py-1.5 rounded-lg bg-[#FFE5CC] border border-[#FFD4AA] hover:bg-[#FF7903] text-[#933D00] hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm min-h-[32px] cursor-pointer"
       >
         <ClipboardCheck className="w-3.5 h-3.5" />
         <span>{triggerLabel}</span>
@@ -143,7 +143,7 @@ export default function InspectionReportModal({
             </button>
 
             <div className="flex items-center gap-3 mb-5 border-b border-slate-100 pb-4">
-              <div className="w-11 h-11 bg-black text-white rounded-2xl flex items-center justify-center shrink-0">
+              <div className="w-11 h-11 bg-[#FFE5CC] text-[#FF7903] border border-[#FFD4AA] rounded-2xl flex items-center justify-center shrink-0">
                 <ClipboardCheck className="w-6 h-6" />
               </div>
               <div>
@@ -298,14 +298,14 @@ export default function InspectionReportModal({
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors min-h-[42px]"
+                  className="px-4 py-2.5 rounded-xl bg-[#FFE5CC] hover:bg-[#ffd9b3] text-[#933D00] border border-[#FFD4AA] text-xs sm:text-sm font-semibold transition-colors min-h-[42px] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !note.trim()}
-                  className="px-5 py-2.5 rounded-xl bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all disabled:opacity-50 min-h-[42px] flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#FF7903] hover:bg-[#e66a00] text-white text-xs sm:text-sm font-semibold shadow-sm shadow-[#FF7903]/20 transition-all disabled:opacity-50 min-h-[42px] flex items-center gap-1.5 cursor-pointer"
                 >
                   {loading ? (
                     <span>{uploadProgressText || "Submitting..."}</span>

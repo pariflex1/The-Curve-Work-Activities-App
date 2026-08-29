@@ -231,7 +231,7 @@ export default async function ContractorDashboard() {
 
                               <Link
                                 href={`/contractor/work/${act.id}`}
-                                className="w-full py-2 px-3 rounded-lg bg-white border border-slate-200 text-slate-800 hover:bg-black hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[38px]"
+                                className="w-full py-2 px-3 rounded-lg bg-[#FFE5CC] border border-[#FFD4AA] text-[#933D00] hover:bg-[#FF7903] hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all min-h-[38px] cursor-pointer"
                               >
                                 <Eye className="w-3.5 h-3.5" />
                                 <span>View Inspection Details</span>

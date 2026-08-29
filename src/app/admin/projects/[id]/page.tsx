@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
   Building2,
@@ -21,6 +21,8 @@ import BlockFormModal from "./BlockFormModal";
 import TeamAssignmentModal from "./TeamAssignmentModal";
 import PaymentFormModal from "@/app/admin/payments/PaymentFormModal";
 
+import { getAllProjectEmployeesHierarchy } from "@/utils/hierarchy";
+
 export const dynamic = "force-dynamic";
 
 interface ProjectDetailPageProps {
@@ -31,7 +33,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const { id } = await params;
   const supabase = await createClient();
 
-  // Fetch project details
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  // Fetch project details, blocks, and units
   const { data: project } = await supabase
     .from("projects")
     .select(`
@@ -45,6 +53,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           unit_number,
           floor,
           unit_type,
+          area,
           status,
           unit_activities (
             id,
@@ -64,13 +73,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   const blocks = project.blocks || [];
 
-  // Fetch team assignments, profiles, and payments concurrently
+  // Fetch team assignments, profiles, payments, and hierarchy concurrently
   const [
     { data: employees },
     { data: contractors },
     { data: owners },
     { data: allProfiles },
     { data: payments },
+    hierarchyMap,
   ] = await Promise.all([
     supabase
       .from("project_employees")
@@ -93,7 +103,46 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       .select("*")
       .eq("project_id", id)
       .order("payment_date", { ascending: false }),
+    getAllProjectEmployeesHierarchy(supabase, id),
   ]);
+
+  const assignedEmployeesData = (employees || []).map((e: any) => ({
+    id: e.id,
+    profile_id: e.profile_id,
+    full_name: e.profiles?.full_name || "Unknown",
+    phone: e.profiles?.phone || null,
+    hierarchy: hierarchyMap[e.profile_id] || {
+      access_level: "full_project",
+      block_ids: [],
+      unit_ids: [],
+    },
+  }));
+
+  const assignedContractorsData = (contractors || []).map((c: any) => ({
+    id: c.id,
+    profile_id: c.profile_id,
+    full_name: c.profiles?.full_name || "Unknown",
+    company_name: c.company_name,
+    phone: c.profiles?.phone || null,
+  }));
+
+  const assignedOwnersData = (owners || []).map((o: any) => ({
+    id: o.id,
+    profile_id: o.profile_id,
+    full_name: o.profiles?.full_name || "Unknown",
+    phone: o.profiles?.phone || null,
+  }));
+
+  const projectBlocksData = blocks.map((b: any) => ({
+    id: b.id,
+    name: b.name,
+    units: (b.units || []).map((u: any) => ({
+      id: u.id,
+      unit_number: u.unit_number,
+      floor: u.floor,
+      unit_type: u.unit_type,
+    })),
+  }));
 
 
   const totalUnits = blocks.reduce((acc: number, b: any) => acc + (b.units?.length || 0), 0);
@@ -308,9 +357,10 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <TeamAssignmentModal
                 projectId={id}
                 profiles={allProfiles || []}
-                assignedEmployeeIds={(employees || []).map((e: any) => e.profile_id)}
-                assignedContractorIds={(contractors || []).map((c: any) => c.profile_id)}
-                assignedOwnerIds={(owners || []).map((o: any) => o.profile_id)}
+                assignedEmployees={assignedEmployeesData}
+                assignedContractors={assignedContractorsData}
+                assignedOwners={assignedOwnersData}
+                projectBlocks={projectBlocksData}
               />
             </div>
 
@@ -320,21 +370,42 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <div>
                 <p className="text-xs uppercase tracking-wider font-semibold text-emerald-700 mb-2.5 flex items-center gap-1.5">
                   <UserCheck className="w-4 h-4" />
-                  <span>Assigned Employees ({employees?.length || 0})</span>
+                  <span>Assigned Site Engineers ({assignedEmployeesData.length})</span>
                 </p>
-                {employees && employees.length > 0 ? (
-                  <div className="space-y-1.5">
-                    {employees.map((emp: any) => (
-                      <div
-                        key={emp.id}
-                        className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs sm:text-sm"
-                      >
-                        <div>
-                          <p className="font-semibold text-slate-900">{emp.profiles?.full_name}</p>
-                          <p className="text-xs text-slate-500">{emp.profiles?.phone || "No phone"}</p>
+                {assignedEmployeesData && assignedEmployeesData.length > 0 ? (
+                  <div className="space-y-2">
+                    {assignedEmployeesData.map((emp) => {
+                      const level = emp.hierarchy?.access_level || "full_project";
+                      const blockCount = emp.hierarchy?.block_ids?.length || 0;
+                      const unitCount = emp.hierarchy?.unit_ids?.length || 0;
+
+                      return (
+                        <div
+                          key={emp.id}
+                          className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs sm:text-sm space-y-1"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-bold text-slate-900">{emp.full_name}</p>
+                            {level === "full_project" && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                🌐 Full Project
+                              </span>
+                            )}
+                            {level === "block_level" && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                🏢 {blockCount} Block(s)
+                              </span>
+                            )}
+                            {level === "unit_level" && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                🚪 {unitCount} Unit(s)
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500">{emp.phone || "No phone"}</p>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-xs text-slate-400 italic">No employees assigned</p>

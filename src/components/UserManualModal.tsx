@@ -86,10 +86,10 @@ export default function UserManualModal({
         onClick={() => setIsOpen(true)}
         className={
           className ||
-          "px-3.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all border border-slate-700 min-h-[38px] cursor-pointer"
+          "px-3.5 py-2 rounded-full bg-[#FFE5CC] hover:bg-[#FF7903] text-[#933D00] hover:text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all border border-[#FFD4AA] min-h-[38px] cursor-pointer"
         }
       >
-        <BookOpen className="w-4 h-4 text-blue-400" />
+        <BookOpen className="w-4 h-4 text-[#FF7903]" />
         <span>{triggerLabel}</span>
       </button>
 
@@ -99,7 +99,7 @@ export default function UserManualModal({
             {/* Modal Header */}
             <div className="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3.5">
-                <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-[#FF7903] text-white flex items-center justify-center shadow-md shadow-[#FF7903]/20 shrink-0">
                   <BookOpen className="w-6 h-6" />
                 </div>
                 <div>
@@ -159,8 +159,8 @@ export default function UserManualModal({
                     onClick={() => setSelectedSection(sec.id)}
                     className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
                       selectedSection === sec.id
-                        ? "bg-blue-600 text-white shadow-xs"
-                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                        ? "bg-[#FF7903] text-white shadow-xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-[#FFE5CC]/50"
                     }`}
                   >
                     <span className="truncate">{sec.title}</span>

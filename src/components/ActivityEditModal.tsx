@@ -114,9 +114,9 @@ export default function ActivityEditModal({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-colors min-h-[32px] inline-flex items-center gap-1"
+        className="px-3 py-1.5 rounded-lg bg-[#FFE5CC] border border-[#FFD4AA] hover:bg-[#FF7903] text-[#933D00] hover:text-white text-xs font-semibold transition-colors min-h-[32px] inline-flex items-center gap-1 cursor-pointer"
       >
-        <Edit className="w-3.5 h-3.5 text-slate-500" />
+        <Edit className="w-3.5 h-3.5" />
         <span>{triggerLabel}</span>
       </button>
 
@@ -132,7 +132,7 @@ export default function ActivityEditModal({
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-11 h-11 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
+              <div className="w-11 h-11 bg-[#FFE5CC] text-[#FF7903] border border-[#FFD4AA] rounded-xl flex items-center justify-center shrink-0">
                 <Sparkles className="w-6 h-6" />
               </div>
               <div>
@@ -275,14 +275,14 @@ export default function ActivityEditModal({
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition-colors min-h-[42px]"
+                    className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl bg-[#FFE5CC] hover:bg-[#ffd9b3] text-[#933D00] border border-[#FFD4AA] text-xs sm:text-sm font-semibold transition-colors min-h-[42px] cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-black hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold shadow-sm transition-all disabled:opacity-50 min-h-[42px]"
+                    className="flex-1 sm:flex-initial px-5 py-2.5 rounded-xl bg-[#FF7903] hover:bg-[#e66a00] text-white text-xs sm:text-sm font-semibold shadow-sm shadow-[#FF7903]/20 transition-all disabled:opacity-50 min-h-[42px] cursor-pointer"
                   >
                     {loading ? "Saving..." : "Save Changes"}
                   </button>

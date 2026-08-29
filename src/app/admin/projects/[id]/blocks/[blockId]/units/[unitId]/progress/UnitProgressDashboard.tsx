@@ -130,7 +130,7 @@ export default function UnitProgressDashboard({
           </div>
           <div className="w-full bg-slate-100 rounded-full h-2 mt-4 overflow-hidden">
             <div
-              className="bg-blue-600 h-full rounded-full transition-all duration-500"
+              className="bg-[#FF7903] h-full rounded-full transition-all duration-500"
               style={{
                 width: `${selectedContractorId === "all" ? overallProgress : filteredProgress}%`,
               }}
@@ -276,7 +276,7 @@ export default function UnitProgressDashboard({
                         <div className="flex items-center gap-2">
                           <div className="w-20 bg-slate-100 rounded-full h-2 overflow-hidden">
                             <div
-                              className="bg-blue-600 h-full rounded-full"
+                              className="bg-[#FF7903] h-full rounded-full"
                               style={{ width: `${act.progress_percentage}%` }}
                             />
                           </div>
@@ -291,7 +291,7 @@ export default function UnitProgressDashboard({
                       <td className="px-5 py-4 text-right">
                         <Link
                           href={`/contractor/work/${act.id}`}
-                          className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-semibold transition-colors min-h-[36px]"
+                          className="inline-flex items-center gap-1 text-xs text-[#FF7903] hover:text-[#e66a00] font-semibold transition-colors min-h-[36px]"
                         >
                           <span>View History &amp; Photos</span>
                           <ArrowUpRight className="w-3.5 h-3.5" />

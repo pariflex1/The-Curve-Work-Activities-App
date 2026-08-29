@@ -99,7 +99,7 @@ export default function PWAInstallButton({ className = "" }: { className?: strin
       title="Install The Curve App directly on your device"
       className={
         className ||
-        "px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all hover:scale-105 active:scale-95 min-h-[40px] border border-blue-400/30 shrink-0 cursor-pointer"
+        "px-3.5 py-2 rounded-xl bg-[#FF7903] hover:bg-[#e66a00] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-[#FF7903]/20 transition-all hover:scale-105 active:scale-95 min-h-[40px] border border-[#FFD4AA]/40 shrink-0 cursor-pointer"
       }
     >
       <img

@@ -135,7 +135,137 @@ export async function createUserAccount(payload: {
   return { success: true, profile: newProfile };
 }
 
-// 2. Reset or update a user's password
+// 2. Update user account details (Name, Phone, Role, Active status, Company Name)
+export async function updateUserAccount(
+  profileId: string,
+  payload: {
+    fullName: string;
+    phone: string;
+    role: "employee" | "contractor" | "owner" | "admin";
+    isActive?: boolean;
+    companyName?: string;
+  }
+) {
+  const check = await verifyAdminCaller();
+  if (!check.authorized || !check.adminClient) {
+    return { error: check.error };
+  }
+
+  const admin = check.adminClient;
+
+  const fullName = payload.fullName?.trim();
+  const phone = payload.phone?.trim();
+  const role = payload.role;
+  const isActive = payload.isActive !== undefined ? payload.isActive : true;
+
+  if (!fullName) return { error: "Full Name is required." };
+  if (!phone) return { error: "Mobile Number is required." };
+
+  const digitsOnly = phone.replace(/\D/g, "");
+  if (digitsOnly.length < 10) {
+    return { error: "Please enter a valid 10-digit mobile number." };
+  }
+
+  // Get current profile
+  const { data: currentProfile, error: fetchErr } = await admin
+    .from("profiles")
+    .select("id, user_id, full_name, phone, role, is_active")
+    .eq("id", profileId)
+    .single();
+
+  if (fetchErr || !currentProfile) {
+    return { error: "User profile not found." };
+  }
+
+  // Check if another profile already has this phone number
+  if (currentProfile.phone !== digitsOnly) {
+    const { data: duplicatePhone } = await admin
+      .from("profiles")
+      .select("id, full_name")
+      .neq("id", profileId)
+      .or(`phone.eq.${digitsOnly},phone.eq.+91${digitsOnly},phone.ilike.%${digitsOnly}%`)
+      .maybeSingle();
+
+    if (duplicatePhone) {
+      return {
+        error: `Mobile number ${digitsOnly} is already assigned to "${duplicatePhone.full_name}".`,
+      };
+    }
+  }
+
+  // Update profile
+  const { data: updatedProfile, error: updateErr } = await admin
+    .from("profiles")
+    .update({
+      full_name: fullName,
+      phone: digitsOnly,
+      role: role,
+      is_active: isActive,
+    })
+    .eq("id", profileId)
+    .select()
+    .single();
+
+  if (updateErr) {
+    return { error: updateErr.message };
+  }
+
+  // Update Auth User metadata & email
+  if (currentProfile.user_id) {
+    const newEmail = `${digitsOnly}@thecurve.app`;
+    await admin.auth.admin.updateUserById(currentProfile.user_id, {
+      email: newEmail,
+      user_metadata: {
+        full_name: fullName,
+        role: role,
+        phone: digitsOnly,
+      },
+    }).catch((err) => {
+      console.warn("Auth user sync warning:", err);
+    });
+  }
+
+  // If contractor and company name provided, update existing project_contractors records
+  if (role === "contractor" && payload.companyName?.trim()) {
+    await admin
+      .from("project_contractors")
+      .update({ company_name: payload.companyName.trim() })
+      .eq("profile_id", profileId);
+  }
+
+  // Write audit log
+  if (check.profile?.id) {
+    await admin.from("audit_logs").insert({
+      actor_profile_id: check.profile.id,
+      action: "UPDATE_USER_ACCOUNT",
+      entity_type: "profiles",
+      entity_id: profileId,
+      meta_json: {
+        previous: {
+          full_name: currentProfile.full_name,
+          phone: currentProfile.phone,
+          role: currentProfile.role,
+          is_active: currentProfile.is_active,
+        },
+        updated: {
+          full_name: fullName,
+          phone: digitsOnly,
+          role: role,
+          is_active: isActive,
+          company_name: payload.companyName || null,
+        },
+      },
+    });
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/projects");
+  revalidatePath("/admin/users");
+  revalidatePath("/employee");
+  return { success: true, profile: updatedProfile };
+}
+
+// 3. Reset or update a user's password
 export async function updateUserPassword(profileId: string, newPassword: string) {
   const check = await verifyAdminCaller();
   if (!check.authorized || !check.adminClient) {

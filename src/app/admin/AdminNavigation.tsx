@@ -110,11 +110,11 @@ export default function AdminNavigation({
                   href={item.href}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-full text-xs sm:text-sm font-medium transition-all android-ripple ${
                     item.isActive
-                      ? "bg-blue-50 text-blue-900 font-semibold shadow-xs border border-blue-200/50"
+                      ? "bg-[#FFE5CC] text-[#933D00] font-bold shadow-xs border border-[#FFD4AA]"
                       : "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${item.isActive ? "text-blue-700" : "text-slate-500"}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${item.isActive ? "text-[#FF7903]" : "text-slate-500"}`} />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -128,7 +128,7 @@ export default function AdminNavigation({
             </span>
 
             <div className="pt-1">
-              <PWAInstallButton className="w-full py-2.5 px-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer android-ripple" />
+              <PWAInstallButton className="w-full py-2.5 px-4 rounded-full bg-[#FF7903] hover:bg-[#e66a00] text-white text-xs font-medium flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer android-ripple" />
             </div>
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function AdminNavigation({
           </Link>
 
           <div className="flex items-center gap-2">
-            <PWAInstallButton className="py-1.5 px-3 rounded-full bg-blue-600 text-white text-[11px] font-medium flex items-center gap-1 android-ripple" />
+            <PWAInstallButton className="py-1.5 px-3 rounded-full bg-[#FF7903] text-white text-[11px] font-medium flex items-center gap-1 android-ripple" />
             <form action={signOut}>
               <button
                 type="submit"
@@ -201,13 +201,13 @@ export default function AdminNavigation({
               <Link
                 key={item.label}
                 href={item.href}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium shrink-0 flex items-center gap-1.5 transition-all android-ripple ${
+                className={`whitespace-nowrap flex items-center gap-1.5 py-1.5 px-3.5 rounded-full text-xs font-semibold shrink-0 transition-all android-ripple ${
                   item.isActive
-                    ? "bg-blue-50 text-blue-900 border border-blue-200/70 shadow-xs font-semibold"
-                    : "bg-white border border-slate-200/80 text-slate-700 hover:bg-slate-100"
+                    ? "bg-[#FF7903] text-white shadow-xs"
+                    : "bg-[#FFE5CC] text-[#933D00] hover:bg-[#ffd9b3] border border-[#FFD4AA]"
                 }`}
               >
-                <Icon className="w-3.5 h-3.5 shrink-0 text-current" />
+                <Icon className="w-3.5 h-3.5" />
                 <span>{item.label}</span>
               </Link>
             );

@@ -94,7 +94,7 @@ export default function LoginPage() {
                   name="password"
                   type="password"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#f8f9fe] border border-slate-300/80 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 focus:bg-white text-base sm:text-sm transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-[#f8f9fe] border border-slate-300/80 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF7903]/30 focus:border-[#FF7903] focus:bg-white text-base sm:text-sm transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -103,7 +103,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm transition-all flex items-center justify-center gap-2 min-h-[46px] disabled:opacity-50 text-sm cursor-pointer android-ripple"
+              className="w-full py-3 px-5 rounded-full bg-[#FF7903] hover:bg-[#e66a00] text-white font-medium shadow-md shadow-[#FF7903]/20 transition-all flex items-center justify-center gap-2 min-h-[46px] disabled:opacity-50 text-sm cursor-pointer android-ripple"
             >
               <span>{loading ? "Signing in..." : "Sign In"}</span>
               {!loading && <ArrowRight className="w-4 h-4" />}

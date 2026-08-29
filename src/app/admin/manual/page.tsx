@@ -103,7 +103,7 @@ export default function AdminManualPage() {
       {/* Header Banner */}
       <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-[#FF7903] text-white flex items-center justify-center shadow-md shadow-[#FF7903]/20 shrink-0">
             <BookOpen className="w-6 h-6" />
           </div>
           <div>
@@ -191,8 +191,8 @@ export default function AdminManualPage() {
                   onClick={() => setSelectedSectionId(section.id)}
                   className={`w-full text-left p-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-between cursor-pointer ${
                     isSelected
-                      ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                      : "bg-slate-50/70 hover:bg-slate-100 border-slate-200/80 text-slate-700"
+                      ? "bg-[#FF7903] text-white border-[#FF7903] shadow-xs"
+                      : "bg-[#FFE5CC]/30 hover:bg-[#FFE5CC] border-[#FFD4AA] text-[#933D00]"
                   }`}
                 >
                   <span className="truncate">{section.title}</span>

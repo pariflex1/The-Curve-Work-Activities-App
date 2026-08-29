@@ -59,21 +59,43 @@
   --popover-foreground: #1c1b1f;
   
   /* Material You Primary & Accent Tones */
-  --primary: #1e293b;
+  --primary: #FF7903;
   --primary-foreground: #ffffff;
-  --secondary: #eef2f8;
-  --secondary-foreground: #1e293b;
-  --muted: #f1f3f9;
-  --muted-foreground: #5e6278;
-  --accent: #e8ecf4;
-  --accent-foreground: #1a1c1e;
+  --secondary: #FFE5CC;
+  --secondary-foreground: #933D00;
+  --muted: #FFF5EC;
+  --muted-foreground: #6B7280;
+  --accent: #FFE5CC;
+  --accent-foreground: #933D00;
   --destructive: #ba1a1a;
   
   /* Surface containers and outlines */
   --border: #e0e4eb;
   --input: #dfe3ea;
-  --ring: #0b57d0;
+  --ring: #FF7903;
   --radius: 1rem;
+}
+
+/* Curve Button Tokens (#FF7903 & #FFE5CC) */
+.btn-curve-primary {
+  background-color: #FF7903 !important;
+  color: #ffffff !important;
+  border-color: #FF7903 !important;
+}
+.btn-curve-primary:hover {
+  background-color: #e66a00 !important;
+  border-color: #e66a00 !important;
+}
+
+.btn-curve-secondary {
+  background-color: #FFE5CC !important;
+  color: #933D00 !important;
+  border-color: #FFD4AA !important;
+}
+.btn-curve-secondary:hover {
+  background-color: #FF7903 !important;
+  color: #ffffff !important;
+  border-color: #FF7903 !important;
 }
 
 @layer base {
