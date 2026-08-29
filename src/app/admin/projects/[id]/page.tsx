@@ -272,7 +272,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                       <BlockFormModal projectId={id} block={block} isEdit={true} />
                       <Link
                         href={`/admin/projects/${id}/blocks/${block.id}`}
-                        className="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 text-black hover:bg-black hover:text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all min-h-[40px]"
+                        className="px-4 py-2 rounded-xl bg-[#FFE5CC] border border-[#FFD4AA] text-[#933D00] hover:bg-[#FF7903] hover:text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer"
                       >
                         <span>Manage Units</span>
                         <ChevronRight className="w-4 h-4" />

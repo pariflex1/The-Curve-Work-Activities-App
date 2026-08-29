@@ -151,7 +151,7 @@ export default async function ProjectsPage() {
                   <div className="pt-2">
                     <Link
                       href={`/admin/projects/${project.id}`}
-                      className="w-full py-3 px-4 rounded-2xl bg-black hover:bg-slate-800 text-white font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-xs sm:text-sm min-h-[44px] cursor-pointer"
+                      className="w-full py-3 px-4 rounded-2xl bg-[#FF7903] hover:bg-[#e66a00] text-white font-bold flex items-center justify-center gap-2 shadow-md shadow-[#FF7903]/20 transition-all text-xs sm:text-sm min-h-[44px] cursor-pointer"
                     >
                       <span>Manage Hierarchy &amp; Team</span>
                       <ChevronRight className="w-4 h-4" />
