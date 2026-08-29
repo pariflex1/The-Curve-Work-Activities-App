@@ -278,12 +278,12 @@ export async function updateUserPassword(profileId: string, newPassword: string)
 
   const admin = check.adminClient;
 
-  // Find user_id from profile
+  // Find profile by user_id (callers pass resetTarget.user_id, the Auth UUID)
   const { data: targetProfile, error: fetchErr } = await admin
     .from("profiles")
     .select("id, user_id, full_name, role")
-    .eq("id", profileId)
-    .single();
+    .eq("user_id", profileId)
+    .maybeSingle();
 
   if (fetchErr || !targetProfile) {
     return { error: "User profile not found." };
