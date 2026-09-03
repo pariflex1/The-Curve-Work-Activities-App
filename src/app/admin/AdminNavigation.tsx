@@ -11,17 +11,30 @@ import {
   ShieldCheck,
   BookOpen,
   LogOut,
+  Building,
 } from "lucide-react";
 
 import { signOut } from "@/app/auth/actions";
 import PWAInstallButton from "@/components/PWAInstallButton";
+import OrganizationSwitcher from "@/components/OrganizationSwitcher";
+
+interface OrgItem {
+  id: string;
+  name: string;
+  code: string | null;
+  role: string;
+}
 
 interface AdminNavigationProps {
   adminName?: string;
+  organizations?: OrgItem[];
+  activeOrgId?: string | null;
 }
 
 export default function AdminNavigation({
   adminName = "Administrator",
+  organizations = [],
+  activeOrgId = null,
 }: AdminNavigationProps) {
   const pathname = usePathname();
 
@@ -31,6 +44,12 @@ export default function AdminNavigation({
       href: "/admin",
       icon: LayoutDashboard,
       isActive: pathname === "/admin",
+    },
+    {
+      label: "Organizations",
+      href: "/admin/organizations",
+      icon: Building,
+      isActive: pathname.startsWith("/admin/organizations"),
     },
     {
       label: "Projects",
@@ -93,6 +112,11 @@ export default function AdminNavigation({
               </span>
             </div>
           </Link>
+        </div>
+
+        {/* Organization Switcher Area */}
+        <div className="px-4 pt-4 pb-2 border-b border-slate-100">
+          <OrganizationSwitcher organizations={organizations} activeOrgId={activeOrgId} />
         </div>
 
         {/* Navigation Buttons Area */}
@@ -191,6 +215,11 @@ export default function AdminNavigation({
               </button>
             </form>
           </div>
+        </div>
+
+        {/* Mobile Org Switcher Bar */}
+        <div className="px-3 py-2 bg-slate-50 border-t border-slate-100">
+          <OrganizationSwitcher organizations={organizations} activeOrgId={activeOrgId} />
         </div>
 
         {/* Mobile Horizontal Scrolling Tabs Bar */}
