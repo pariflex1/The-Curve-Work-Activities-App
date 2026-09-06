@@ -6,22 +6,22 @@ import { revalidatePath } from "next/cache";
 async function verifyAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { authorized: false };
+  if (!user) return null;
   const { data: profile } = await supabase.from("profiles").select("role").eq("user_id", user.id).single();
-  if (!profile || profile.role !== "admin") return { authorized: false };
-  return { authorized: true, supabase };
+  if (!profile || profile.role !== "admin") return null;
+  return supabase;
 }
 
 export async function createOrganization(formData: FormData) {
-  const check = await verifyAdmin();
-  if (!check.authorized) return { error: "Unauthorized" };
+  const supabase = await verifyAdmin();
+  if (!supabase) return { error: "Unauthorized" };
 
   const name = (formData.get("name") as string)?.trim();
   const code = (formData.get("code") as string)?.trim() || null;
 
   if (!name) return { error: "Organization Name is required." };
 
-  const { data, error } = await check.supabase
+  const { data, error } = await supabase
     .from("organizations")
     .insert({ name, code })
     .select()
@@ -34,13 +34,13 @@ export async function createOrganization(formData: FormData) {
 }
 
 export async function createDepartment(orgId: string, name: string) {
-  const check = await verifyAdmin();
-  if (!check.authorized) return { error: "Unauthorized" };
+  const supabase = await verifyAdmin();
+  if (!supabase) return { error: "Unauthorized" };
 
   const deptName = name?.trim();
   if (!deptName) return { error: "Department name is required." };
 
-  const { data, error } = await check.supabase
+  const { data, error } = await supabase
     .from("departments")
     .insert({ organization_id: orgId, name: deptName })
     .select()
@@ -53,13 +53,13 @@ export async function createDepartment(orgId: string, name: string) {
 }
 
 export async function createDesignation(orgId: string, deptId: string | null, title: string) {
-  const check = await verifyAdmin();
-  if (!check.authorized) return { error: "Unauthorized" };
+  const supabase = await verifyAdmin();
+  if (!supabase) return { error: "Unauthorized" };
 
   const desigTitle = title?.trim();
   if (!desigTitle) return { error: "Designation title is required." };
 
-  const { data, error } = await check.supabase
+  const { data, error } = await supabase
     .from("designations")
     .insert({
       organization_id: orgId,
@@ -76,10 +76,10 @@ export async function createDesignation(orgId: string, deptId: string | null, ti
 }
 
 export async function deleteDepartment(deptId: string) {
-  const check = await verifyAdmin();
-  if (!check.authorized) return { error: "Unauthorized" };
+  const supabase = await verifyAdmin();
+  if (!supabase) return { error: "Unauthorized" };
 
-  const { error } = await check.supabase.from("departments").delete().eq("id", deptId);
+  const { error } = await supabase.from("departments").delete().eq("id", deptId);
   if (error) return { error: error.message };
 
   revalidatePath("/admin/organizations");
@@ -87,10 +87,10 @@ export async function deleteDepartment(deptId: string) {
 }
 
 export async function deleteDesignation(desigId: string) {
-  const check = await verifyAdmin();
-  if (!check.authorized) return { error: "Unauthorized" };
+  const supabase = await verifyAdmin();
+  if (!supabase) return { error: "Unauthorized" };
 
-  const { error } = await check.supabase.from("designations").delete().eq("id", desigId);
+  const { error } = await supabase.from("designations").delete().eq("id", desigId);
   if (error) return { error: error.message };
 
   revalidatePath("/admin/organizations");
